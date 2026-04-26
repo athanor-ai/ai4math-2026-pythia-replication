@@ -1,0 +1,135 @@
+\section{The pythia tactic surface}
+\label{sec:tactic-surface}
+
+\texttt{pythia} ships five user-facing tactics, one named aesop
+ruleset, and three attribute-driven registries. The design follows
+the CoqHammer pattern \citep{czajkakaliszyk2018coqhammer}: a
+domain-specific dispatcher with extensible attribute-driven lemma
+selection, a fall-through to general-purpose automation, and
+kernel-checked reconstruction for any external-oracle steps.
+
+\subsection{Five tactics}
+\label{sec:tactic-surface-five}
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{lp{4.5cm}}
+\toprule
+\textbf{Tactic} & \textbf{Role} \\
+\midrule
+\texttt{pythia} & Top-level dispatcher. Tries registered \texttt{stat\_lemma}s, then aesop ruleset \texttt{Pythia}, then \texttt{linarith}. \\
+\texttt{stats\_ineq} & Discharges concentration and tail-bound inequalities (Hoeffding, Bernstein, sub-Gaussian, sub-gamma). \\
+\texttt{prob\_simp} & Probability normalization rewrites. Pushes integrals, splits indicator products, reduces to MGF form. \\
+\texttt{anytime\_valid} & Closes Ville-bound goals for anytime-valid confidence sequences. Specializes to Howard-Ramdas, betting, vector. \\
+\texttt{z3\_check} & Linear-real-arithmetic Z3 oracle with linarith reconstruction. Kernel-checked. \\
+\bottomrule
+\end{tabular}
+\caption{The five \texttt{pythia} tactics. \texttt{pythia} is the
+default entry point. The four specialized tactics are exposed for
+direct invocation when the user knows the goal shape.}
+\label{tab:tactic-surface}
+\end{table}
+
+% TODO: each tactic deserves a one-paragraph design note. asabi to draft.
+
+\paragraph{\texttt{pythia} (top-level dispatcher).}
+The default entry point. Tries the registered statistical lemma
+database, then the named aesop ruleset \texttt{Pythia}, then
+\texttt{linarith}. The fall-through ordering is fixed. The lemma
+database and aesop ruleset are user-extensible.
+
+\paragraph{\texttt{stats\_ineq}.}
+Discharges sub-Gaussian, sub-gamma, Bernstein-Bennett, and
+Hoeffding-shape inequalities. The lemma set is registered via
+\texttt{@[stats\_ineq]}. Reconstruction is internal Lean and
+axiom-clean.
+
+\paragraph{\texttt{prob\_simp}.}
+Probability-domain rewrite set. Pushes integrals through linear
+operators, splits indicator products, and reduces martingale
+expressions to MGF form for downstream use by
+\texttt{stats\_ineq}. The rewrite set is registered via
+\texttt{@[prob\_simp]}.
+
+\paragraph{\texttt{anytime\_valid}.}
+Closes Ville-type maximal-inequality goals. Specializes to the
+Howard-Ramdas \citep{howard2021time}, betting
+\citep{waudbysmith2024estimating}, and vector
+\citep{whitehouse2025timeuniform} families, dispatching by goal
+shape. The case-split table is small (currently four families) and
+hard-coded. Future families register via \texttt{@[anytime\_valid]}.
+
+\paragraph{\texttt{z3\_check}.}
+External Z3 oracle for linear real arithmetic, with
+\texttt{linarith} reconstruction inside Lean. Z3 supplies the proof
+witness. \texttt{linarith} reconstructs the witness step inside
+the kernel. The kernel is the final word. Z3 cannot smuggle axioms.
+This follows the CoqHammer reconstruction pattern
+\citep{czajkakaliszyk2018coqhammer}.
+
+\subsection{Registry attributes}
+\label{sec:tactic-surface-registries}
+
+The library uses three attribute-driven registries:
+
+\begin{itemize}[leftmargin=1.3em,itemsep=0.2em]
+\item \texttt{@[stat\_lemma]}: lemma database for the top-level
+  \texttt{pythia} dispatcher.
+\item \texttt{@[stats\_ineq]}: tail-bound and concentration
+  lemmas dispatched by \texttt{stats\_ineq}.
+\item \texttt{@[prob\_simp]}: probability rewrite rules dispatched
+  by \texttt{prob\_simp}.
+\end{itemize}
+
+User extensions consist of tagging library lemmas with the
+appropriate attribute. No fork is required.
+
+\subsection{The \texttt{Pythia} aesop ruleset}
+\label{sec:tactic-surface-aesop}
+
+The library declares a named aesop ruleset \texttt{Pythia} containing
+the registered \texttt{stat\_lemma} entries. Direct invocation is
+supported via \texttt{aesop (rule\_sets := [Pythia])}, equivalent to
+the \texttt{pythia} dispatcher's middle stage. This gives users a
+finer-grained interface when the dispatcher's outer wrapping is not
+desired.
+
+\subsection{Architecture}
+\label{sec:tactic-surface-arch}
+
+% TODO: insert TikZ figure. Sketch:
+%   goal -> [registry lookup, three attribute-driven sets]
+%        -> [aesop (rule_sets := [Pythia])]
+%        -> [linarith fall-through]
+%   side-channel: z3_check (separate user-invoked tactic, not
+%   part of the pythia dispatcher chain).
+\begin{figure}[h]
+\centering
+\framebox[0.95\columnwidth]{\parbox{0.85\columnwidth}{
+\textbf{Architecture (TODO: replace with TikZ).}
+The \texttt{pythia} dispatcher tries the
+\texttt{@[stat\_lemma]} database first, then the
+\texttt{Pythia} aesop ruleset, then \texttt{linarith}. Each stage
+is independently Lean-kernel-checked. \texttt{z3\_check} is a
+separate user-invoked tactic with its own
+linarith-based reconstruction step, not part of the dispatcher
+chain.
+}}
+\caption{The \texttt{pythia} dispatcher chain. Three stages, each
+kernel-checked independently. \texttt{z3\_check} sits outside the
+chain.}
+\label{fig:arch}
+\end{figure}
+
+\paragraph{Why this shape.}
+The three-stage chain mirrors the empirical structure of statistical
+proofs in our library: many goals close on a single lemma application
+(stage 1), some require forward search through a lemma set (stage 2),
+some reduce to a linear arithmetic obligation after the rewrite
+(stage 3). Routing by goal shape is not necessary at the top level.
+The cost of trying stages in order is small relative to the cost of
+incorrect early termination.
+
+% TODO: add brief usage example. asabi to draft 5-10 line code block
+% showing pythia closing a Hoeffding instance.

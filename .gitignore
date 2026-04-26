@@ -1,0 +1,25 @@
+# LaTeX build artifacts (we DO commit main.pdf for review-cycle visibility,
+# matching the neurips-2026-anytime-valid convention).
+*.aux
+*.log
+*.out
+*.bbl
+*.blg
+*.toc
+*.lof
+*.lot
+*.synctex.gz
+*.fls
+*.fdb_latexmk
+*.nav
+*.snm
+*.vrb
+
+# Build log goes in build.log (kept) but per-run scratch is ignored.
+*.tmp
+
+# Editor artifacts.
+.DS_Store
+*.swp
+*.swo
+*~

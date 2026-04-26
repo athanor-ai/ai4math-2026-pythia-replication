@@ -1,0 +1,129 @@
+% AI4MATH 2026 workshop submission.
+% Title: "pythia: a Lean 4 tactic library for statistical proof automation"
+%
+% NOTE on template: AI4MATH 2026 (https://ai4math2026.github.io/#cfp) does
+% not publish a venue-specific style file. AI4MATH workshops in prior
+% cycles inherited the host conference's template (NeurIPS 2024, ICML
+% 2025). Aidan's directive (2026-04-26) selects ICML formatting since
+% AI4MATH 2026 sits in the ML-conference orbit. We vendor ICML 2025 as
+% the closest live template; swap to icml2026 when the 2026 styles
+% publish (https://media.icml.cc/Conferences/ICML2026/Styles/icml2026.zip
+% currently 404s).
+%
+% Compile: bash build.sh  (runs pdflatex x3 + bibtex).
+
+\documentclass{article}
+
+% Style files vendored under styles/. TEXINPUTS in build.sh adds
+% styles/ to the search path so \usepackage{icml2025} resolves.
+\usepackage{icml2025}
+
+\usepackage{microtype}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage{newunicodechar}
+% Map math-Unicode chars that appear in verbatim Lean blocks to LaTeX
+% equivalents so pdflatex doesn't choke on them.
+\newunicodechar{ℕ}{\ensuremath{\mathbb{N}}}
+\newunicodechar{ℝ}{\ensuremath{\mathbb{R}}}
+\newunicodechar{ℤ}{\ensuremath{\mathbb{Z}}}
+\newunicodechar{∀}{\ensuremath{\forall}}
+\newunicodechar{∃}{\ensuremath{\exists}}
+\newunicodechar{≤}{\ensuremath{\leq}}
+\newunicodechar{≥}{\ensuremath{\geq}}
+\newunicodechar{≠}{\ensuremath{\neq}}
+\newunicodechar{∑}{\ensuremath{\sum}}
+\newunicodechar{∞}{\ensuremath{\infty}}
+\newunicodechar{∈}{\ensuremath{\in}}
+\newunicodechar{↦}{\ensuremath{\mapsto}}
+\newunicodechar{→}{\ensuremath{\to}}
+\newunicodechar{←}{\ensuremath{\leftarrow}}
+\newunicodechar{α}{\ensuremath{\alpha}}
+\newunicodechar{β}{\ensuremath{\beta}}
+\newunicodechar{γ}{\ensuremath{\gamma}}
+\newunicodechar{δ}{\ensuremath{\delta}}
+\newunicodechar{ε}{\ensuremath{\varepsilon}}
+\newunicodechar{σ}{\ensuremath{\sigma}}
+\newunicodechar{τ}{\ensuremath{\tau}}
+\newunicodechar{λ}{\ensuremath{\lambda}}
+\newunicodechar{·}{\ensuremath{\cdot}}
+\newunicodechar{⟨}{\ensuremath{\langle}}
+\newunicodechar{⟩}{\ensuremath{\rangle}}
+
+\usepackage{hyperref}
+\newcommand{\theHalgorithm}{\arabic{algorithm}}
+\usepackage[capitalize,noabbrev]{cleveref}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{float}
+\usepackage[section]{placeins}
+\setlength{\emergencystretch}{3em}
+
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{assumption}[theorem]{Assumption}
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\Prob}{\mathbb{P}}
+
+% Listings setup. We use plain verbatim for Lean fragments rather than
+% a custom lstdefinelanguage; the paper is about the tactic surface,
+% not Lean source archaeology, so syntax highlighting is not needed.
+% (Avoiding lstdefinelanguage also keeps the preamble paper_lint clean
+% on '--' Lean-comment lexer hints.)
+\lstset{
+  basicstyle=\ttfamily\small,
+  breaklines=true,
+  showstringspaces=false,
+  columns=fullflexible,
+}
+
+\icmltitlerunning{pythia: a Lean 4 tactic library for statistical proof automation}
+
+\begin{document}
+
+\twocolumn[
+\icmltitle{pythia: a Lean 4 tactic library for \\
+           statistical proof automation}
+
+\icmlsetsymbol{equal}{*}
+
+\begin{icmlauthorlist}
+\icmlauthor{Anonymous Authors}{anon}
+\end{icmlauthorlist}
+
+\icmlaffiliation{anon}{Affiliation redacted for double-blind review.}
+
+\icmlcorrespondingauthor{Anonymous Authors}{anon@example.org}
+
+\icmlkeywords{Lean 4, proof automation, statistics, anytime-valid inference, tactic library, automated theorem proving}
+
+\vskip 0.3in
+]
+
+\printAffiliationsAndNotice{}
+
+\input{sections/abstract}
+\input{sections/intro}
+\input{sections/tactic-surface}
+\input{sections/library}
+\input{sections/aristotle}
+\input{sections/discussion}
+
+\bibliographystyle{icml2025}
+\bibliography{references}
+
+\input{sections/appendix}
+
+\end{document}

@@ -1,0 +1,34 @@
+% Abstract: AI4MATH 2026 workshop submission.
+\begin{abstract}
+Lean 4 with Mathlib ships strong general automation (\texttt{aesop},
+\texttt{simp}, \texttt{linarith}, \texttt{polyrith}, \texttt{nlinarith},
+\texttt{positivity}, \texttt{measurability}, \texttt{bound},
+\texttt{gcongr}). It does not ship a statistics-domain hammer.
+We present \texttt{pythia}, a Lean 4 tactic library that closes
+statistical-domain goals via five registered tactics:
+\texttt{pythia} (general dispatcher),
+\texttt{stats\_ineq} (concentration and tail-bound inequalities),
+\texttt{prob\_simp} (probability normalization rewrites),
+\texttt{anytime\_valid} (Ville-bound closer for confidence sequences),
+and \texttt{z3\_check} (Z3 oracle with linarith reconstruction in the
+CoqHammer style of \citet{czajkakaliszyk2018coqhammer}).
+The library ships with extensible attribute-driven registries
+(\texttt{@[stat\_lemma]}, \texttt{@[stats\_ineq]},
+\texttt{@[prob\_simp]}) and a named aesop ruleset \texttt{Pythia}.
+A library of approximately twelve modules covers anytime-valid
+confidence sequences \citep{howard2021time,waudbysmith2024estimating},
+matrix concentration scaffolds \citep{tropp2012usermatrix,lieb1973}, e-detectors
+\citep{shinramdasrinaldo2024,ramdasgrunwaldvovkshafer2023},
+queueing primitives, control Lyapunov bounds, and the binary
+Bretagnolle-Huber inequality. Every shipped theorem is
+axiom-clean against the standard Lean kernel set
+($\texttt{propext}$, $\texttt{Classical.choice}$, $\texttt{Quot.sound}$). Hard structural Mathlib gaps are routed to
+the Aristotle automated theorem prover
+\citep{harmonic2025aristotle} as an oracle, with kernel-checked
+reconstruction inside Lean and a refusal policy for vacuous-truth
+closures. The library is pinned to Lean 4.28 + Mathlib v4.28.0 and
+released open-source. Measured on a small subset of the FormalAVS
+benchmark \citep{anonymous2026formalavs}, Aristotle as oracle closes
+problems unreachable by hand-Mathlib alone. Full numbers are
+reported in the dataset paper.
+\end{abstract}

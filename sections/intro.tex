@@ -1,0 +1,70 @@
+\section{Introduction}
+\label{sec:intro}
+
+Lean 4 with Mathlib ships strong general-purpose proof automation:
+\texttt{aesop} for forward search, \texttt{simp} for rewriting,
+\texttt{linarith} and \texttt{polyrith} for linear and polynomial
+arithmetic, \texttt{nlinarith} for non-linear arithmetic,
+\texttt{positivity} for sign goals, \texttt{measurability} for the
+$\sigma$-algebra fragment, \texttt{bound} for monotone composition,
+\texttt{gcongr} for generalized congruence
+\citep{moura2021lean,mathlib2020community,mathlib2025}. Statistical
+proofs route through these general tactics. Each statistical lemma
+typically requires by-hand decomposition into a chain of
+\texttt{simp} sets, \texttt{linarith} hypotheses, and Mathlib lemma
+selection. There is no domain hammer for statistics.
+
+% TODO: tighten this paragraph; pin one-sentence claim of the gap.
+The closest design template is CoqHammer
+\citep{czajkakaliszyk2018coqhammer}: an external ATP (Vampire,
+E, CVC4) discharges goals with kernel-checked reconstruction inside
+Coq. Sledgehammer
+\citep{paulsonblanchette2010threeyears,blanchettesledgehammer2011}
+plays the same role in Isabelle/Higher-Order Logic (HOL). Lean 4 lacks a comparable
+Sledgehammer-class tool for general proof, and lacks a
+statistics-domain hammer specifically. We do not address the general
+case in this paper. We address the statistics-domain case.
+
+% TODO: ensure this contribution paragraph is decisive.
+\paragraph{Contribution.}
+We present \texttt{pythia}, a Lean 4 tactic library for statistical
+proof automation. \texttt{pythia} ships five registered tactics, one
+named aesop ruleset, three attribute-driven registries, and a
+twelve-module proof library covering anytime-valid confidence
+sequences, matrix and scalar concentration, e-detectors,
+queueing, control, and information-theoretic divergences. The
+shipped library is axiom-clean against
+$\{\texttt{propext}, \texttt{Classical.choice}, \texttt{Quot.sound}\}$
+and pinned to Lean 4.28 + Mathlib v4.28.0. Hard structural goals are
+routed to Aristotle \citep{harmonic2025aristotle} as an oracle, with
+kernel-checked reconstruction inside Lean.
+
+\paragraph{Case study (vacuous-truth catch).}
+% TODO: shorten to 4-5 lines. Cite project ID redacted.
+On 2026-04-26 the Aristotle prover closed a candidate theorem in our
+\texttt{wald\_wolfowitz\_optimal} development by routing through a
+contradictory premise: a Bool partition combined with a log-boundary
+constraint forced both $\alpha \geq 1$ and $\alpha < 1$, closing the
+goal vacuously. The closure was kernel-checked. The theorem statement
+was the bug. \texttt{pythia}'s discipline (axiom-clean only, refuse
+vacuous closures, audit hypotheses) caught the issue and forced a
+restatement to the two-measure form. We treat this kind of catch as a
+first-class library responsibility, not as a separate review pass.
+
+\paragraph{Paper organisation.}
+Section~\ref{sec:tactic-surface} describes the five-tactic surface and
+the registry attributes. Section~\ref{sec:library} groups the shipped
+library content by domain. Section~\ref{sec:aristotle} describes the
+Aristotle integration as an oracle and the vacuous-truth refusal
+policy. Section~\ref{sec:discussion} compares against aesop,
+Sledgehammer, CoqHammer, and Mathlib's existing tactic suite,
+states limitations, and reports a small Aristotle vs DSPv2 vs
+Opus 4.6 head-to-head on a subset of FormalAVS
+\citep{anonymous2026formalavs}. Full numbers are in the dataset paper.
+
+\paragraph{Reproduction and code.}
+The \texttt{pythia} library is open source. The library link, axiom
+audit transcripts, and reproduction recipes are listed in
+Appendix~\ref{sec:appendix-repro}. The dataset of statistical
+theorem-proving benchmarks (FormalAVS,
+\citet{anonymous2026formalavs}) is reported in a separate paper.

@@ -1,0 +1,158 @@
+\appendix
+
+\section{Library inventory}
+\label{sec:appendix-inventory}
+
+% TODO: full theorem-by-theorem inventory of the pythia library at
+% the AI4MATH submission cut. asabi to populate after sleep, drawing
+% from the public pythia repo's module headers.
+
+The shipped library at the AI4MATH 2026 submission cut spans
+twelve modules. Theorems below are listed with module path,
+one-line statement, and axiom-audit status.
+
+\subsection{Anytime-valid inference}
+\begin{itemize}[leftmargin=1.3em,itemsep=0.2em]
+\item \texttt{Pythia.AnytimeValid.HowardRamdasCS}: Howard-Ramdas
+  Ville bound for self-normalized confidence sequences. (TODO:
+  exact theorem name + statement.) Axiom-clean.
+\item \texttt{Pythia.AnytimeValid.BettingCS}: betting-CS coverage
+  certificate. (TODO: exact.) Axiom-clean.
+\item \texttt{Pythia.AnytimeValid.}\allowbreak\texttt{combine\_eprocesses\_avg}:
+  e-process average-merge. (TODO: exact.) Axiom-clean.
+\end{itemize}
+
+\subsection{Concentration}
+\begin{itemize}[leftmargin=1.3em,itemsep=0.2em]
+\item \texttt{Pythia.Concentration.SubGaussian}: sub-Gaussian
+  tail bound (Hoeffding-style). Axiom-clean.
+\item \texttt{Pythia.Concentration.SubGamma}: sub-gamma tail
+  bound. Axiom-clean.
+\item \texttt{Pythia.Concentration.}\allowbreak\texttt{BernsteinBennett}: variance-aware
+  MGF bridge. Axiom-clean.
+\end{itemize}
+
+\subsection{Matrix concentration (scaffold)}
+\begin{itemize}[leftmargin=1.3em,itemsep=0.2em]
+\item \texttt{Pythia.Matrix.Lieb}: Lieb concavity inequality
+  scaffold \citep{lieb1973}. (TODO: which dependent obligations
+  remain.)
+\item \texttt{Pythia.Matrix.Bernstein}: matrix-Bernstein scaffold
+  \citep{tropp2012usermatrix}. (TODO.)
+\end{itemize}
+
+\subsection{Other modules}
+\begin{itemize}[leftmargin=1.3em,itemsep=0.2em]
+\item \texttt{Pythia.Control.LyapunovDiscrete}: discrete-time
+  Lyapunov stability.
+\item \texttt{Pythia.Queueing.ErlangB},
+  \texttt{Pythia.Queueing.LittlesLaw}: queueing primitives.
+\item \texttt{Pythia.TimeSeries.Wold} \citep{wold1938}.
+\item \texttt{Pythia.Risk.CVaR}
+  \citep{rockafellaruryasev2000}.
+\item \texttt{Pythia.Asymptotics.DeltaMethod}: scalar and multivariate.
+\item \texttt{Pythia.InfoTheory.BretagnolleHuber}: binary case.
+\end{itemize}
+
+\section{Worked examples}
+\label{sec:appendix-worked}
+
+% TODO: 3-4 worked examples. Lean code blocks via lstlisting. asabi
+% to draft after pulling actual proofs from the public pythia repo.
+
+\subsection{anytime\_valid: Ville-bound closer}
+\label{sec:appendix-worked-av}
+
+% TODO: take a 5-line Howard-Ramdas Ville-bound goal, show the
+% pre-tactic and post-tactic state, walk through the registry hit.
+
+\subsection{z3\_check: linear-real-arithmetic with reconstruction}
+\label{sec:appendix-worked-z3}
+
+% TODO: linear inequality goal, show the Z3 witness, show the
+% linarith reconstruction, show the kernel-check axiom audit.
+
+\subsection{pythia: chain-rule fall-through to aesop}
+\label{sec:appendix-worked-pythia-fall}
+
+% TODO: a goal that misses stage 1 (no registered lemma matches),
+% closes at stage 2 (aesop ruleset Pythia hits a chain).
+
+\subsection{combine\_eprocesses\_avg: axiom-clean closure walkthrough}
+\label{sec:appendix-worked-edet}
+
+% TODO: full walkthrough of the average-merge proof. Show the axiom
+% audit transcript at the end.
+
+\section{Aristotle vs DSPv2 vs Opus 4.6 (wider subset)}
+\label{sec:appendix-comparison}
+
+% TODO: wider table from FormalAVS \citep{anonymous2026formalavs}.
+% Pull from the dataset paper rather than re-running. 15-30 problems
+% would be a sensible illustrative scope; full numbers cite the
+% dataset paper. asabi to populate.
+
+Table~\ref{tab:wide-comparison} reports the wider subset.
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{lccc}
+\toprule
+\textbf{Problem} & \textbf{Aristotle} & \textbf{DSPv2} & \textbf{Opus 4.6} \\
+\midrule
+% TODO: 15-30 rows from FormalAVS subset. Cite dataset paper for
+% the full comparison.
+\multicolumn{4}{c}{TODO: populate from \citep{anonymous2026formalavs}} \\
+\bottomrule
+\end{tabular}
+\caption{Wider subset from FormalAVS. Solve outcomes per single
+attempt. Full benchmark numbers in \citet{anonymous2026formalavs}.}
+\label{tab:wide-comparison}
+\end{table}
+
+\section{Reproduction}
+\label{sec:appendix-repro}
+
+% TODO: anonymise URLs for double-blind. Camera-ready will list
+% the public pythia repo URL and the corresponding dataset paper
+% repository. For submission, write "url redacted".
+
+\paragraph{Toolchain pin.}
+Lean 4.28 + Mathlib v4.28.0. The repository's
+\texttt{lean-toolchain} file declares the exact toolchain. The
+Mathlib dependency in \texttt{lakefile.toml} pins the v4.28.0 release
+tag.
+
+\paragraph{Build.}
+\begin{verbatim}
+git clone <pythia-url-redacted>
+cd pythia
+lake exe cache get
+lake build
+\end{verbatim}
+
+\paragraph{Axiom audit.}
+Each shipped module ends with a \texttt{\#print axioms} block. The
+expected audit set is
+$\{\texttt{propext}, \texttt{Classical.choice}, \texttt{Quot.sound}\}$.
+Any deviation fails the audit.
+
+\paragraph{FormalAVS benchmark.}
+The full benchmark is reported in
+\citet{anonymous2026formalavs}. Reproduction commands for the
+benchmark are in that paper's reproduction appendix.
+
+\section{Related related-work, extended}
+\label{sec:appendix-related}
+
+% TODO: extended related-work. Touch on:
+%   - Lean 4 tactic infrastructure (aesop, simp, linarith, polyrith,
+%     nlinarith, positivity, measurability, bound, gcongr).
+%   - Sledgehammer / Isabelle automation.
+%   - CoqHammer + premise selection literature.
+%   - Statistical proof formalization (mathlib/Probability,
+%     Compcert-style stat libraries, Coq's mathcomp.analysis).
+%   - LeanDojo / proof-state retrieval as a precedent for
+%     attribute-driven registries.
+% asabi to draft after sleep.

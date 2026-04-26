@@ -1,0 +1,86 @@
+\section{Aristotle integration as oracle}
+\label{sec:aristotle}
+
+A subset of statistical proof goals exceed what aesop, simp, linarith,
+and the registered \texttt{pythia} lemma sets close in practice. We
+route these to the Aristotle automated theorem prover
+\citep{harmonic2025aristotle} as an oracle. Aristotle returns a Lean
+4 proof script. The script is checked by the Lean kernel inside the
+calling project. Aristotle is one of two oracles in the library. The
+other is Z3 (Section~\ref{sec:tactic-surface-five}).
+
+\subsection{Submission pattern}
+\label{sec:aristotle-pattern}
+
+Each Aristotle call is a project tarball submission. The flow:
+state the theorem in Lean with a \texttt{sorry}, package the project
+without the Lean build cache (\texttt{.lake} excluded), submit via
+\texttt{aristotle submit}, monitor for completion, integrate the
+returned proof, and run the axiom audit. The axiom audit is the
+verification step that distinguishes a kernel-checked Aristotle proof
+from a vacuous closure.
+
+% TODO: describe the audit script briefly. \#print axioms is the
+% kernel-level check, but we add a vacuous-closure heuristic: any
+% proof that reduces the conclusion to \texttt{False} via a contradiction
+% in hypotheses is flagged.
+
+\subsection{Vacuous-truth refusal}
+\label{sec:aristotle-vacuous}
+
+ATPs can close a theorem by deriving a contradiction from its
+hypotheses, then concluding anything. The kernel accepts such
+proofs. The proof is sound. The theorem statement is the bug.
+
+\paragraph{Case (2026-04-26).}
+We submitted a candidate
+\texttt{wald\_wolfowitz\_optimal} theorem. Aristotle returned a
+closure that combined a Bool partition with a log-boundary constraint
+to force both $\alpha \geq 1$ and $\alpha < 1$. The kernel accepted
+the proof. The audit flagged the hypothesis chain as
+self-contradictory. We rejected the closure, restated the theorem in
+two-measure form (separating the null and alternative measures
+explicitly), and resubmitted. The two-measure form was the intended
+target. The original Bool-partition form was a statement bug.
+
+\paragraph{Audit policy.}
+The library treats vacuous closures as theorem-statement bugs, not as
+prover successes. Concretely: every Aristotle-returned proof is
+audited for contradictory premises before integration. Closures
+flagged as vacuous block the corresponding theorem from the
+axiom-clean library until the statement is reformed. This policy is
+not unique to Aristotle. The same audit applies to any external
+prover, including human proofs that close via a hypothesis
+contradiction the author did not notice.
+
+\subsection{Z3 as a second oracle}
+\label{sec:aristotle-z3}
+
+The \texttt{z3\_check} tactic dispatches linear-real-arithmetic goals
+to Z3 \citep{demoura2008z3}. Z3 returns a proof witness. The witness
+is then reconstructed inside Lean by \texttt{linarith}. The Lean
+kernel is the final word. The pattern is the CoqHammer
+\citep{czajkakaliszyk2018coqhammer} reconstruction strategy adapted
+to Lean 4. Z3 cannot smuggle axioms. \texttt{linarith} is
+axiom-clean and the reconstruction step certifies the witness. If
+\texttt{linarith} cannot reconstruct, the \texttt{z3\_check} call
+fails loud rather than silently trusting Z3.
+
+\subsection{When to call Aristotle}
+\label{sec:aristotle-when}
+
+The library convention is to attempt local closure first. If the
+goal closes by \texttt{rfl}, \texttt{simp}, \texttt{positivity},
+\texttt{linarith}, \texttt{nlinarith}, \texttt{polyrith}, or the
+registered \texttt{stat\_lemma} database, no Aristotle call is made.
+Aristotle is reserved for hard structural Mathlib gaps: measure-theoretic
+$\sigma$-additivity steps, dominated-convergence side conditions,
+matrix-concentration intermediate lemmas, and similar obligations
+for which a hand-Mathlib closure either does not exist or would
+exceed five lines of dispatch. The five-line threshold is a
+convention, not a hard cap. The vacuous-closure audit is the gate
+on integration. The dispatch threshold is only the call decision.
+
+% TODO: paragraph needs polish. asabi to refine "five lines"
+% threshold language; Aidan flagged generic prose-length
+% qualifications as ai-slop.
