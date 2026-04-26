@@ -32,7 +32,11 @@ pages_max = 5
 
 [figures]
 root = "figures"
-allowed_extensions = ["pdf"]
+# Allow .tex fragments as figure inputs (TikZ source for the dispatcher
+# architecture diagram lives at figures/arch-figure.tex; paper_lint
+# already skips files inside figures/, which prevents TikZ semicolons
+# from tripping the prose semicolon-density rule).
+allowed_extensions = ["pdf", "tex"]
 
 [hygiene]
 root_markdown_whitelist = ["README.md"]

@@ -2,7 +2,7 @@
 \label{sec:tactic-surface}
 
 \texttt{pythia} ships five user-facing tactics, one named aesop
-ruleset, and three attribute-driven registries. The design follows
+ruleset, and four attribute-driven registries. The design follows
 the CoqHammer pattern \citep{czajkakaliszyk2018coqhammer}: a
 domain-specific dispatcher with extensible attribute-driven lemma
 selection, a fall-through to general-purpose automation, and
@@ -18,118 +18,128 @@ kernel-checked reconstruction for any external-oracle steps.
 \toprule
 \textbf{Tactic} & \textbf{Role} \\
 \midrule
-\texttt{pythia} & Top-level dispatcher. Tries registered \texttt{stat\_lemma}s, then aesop ruleset \texttt{Pythia}, then \texttt{linarith}. \\
-\texttt{stats\_ineq} & Discharges concentration and tail-bound inequalities (Hoeffding, Bernstein, sub-Gaussian, sub-gamma). \\
-\texttt{prob\_simp} & Probability normalization rewrites. Pushes integrals, splits indicator products, reduces to MGF form. \\
-\texttt{anytime\_valid} & Closes Ville-bound goals for anytime-valid confidence sequences. Specializes to Howard-Ramdas, betting, vector. \\
-\texttt{z3\_check} & Linear-real-arithmetic Z3 oracle with linarith reconstruction. Kernel-checked. \\
+\texttt{pythia} & Top-level dispatcher. Runs aesop against \texttt{[Pythia, default]} rule sets, then a \texttt{simp; omega; linarith; positivity} cleanup chain. \\
+\texttt{stats\_ineq} & Discharges concentration and tail-bound inequalities. Dispatches via Mathlib's \texttt{bound}, then \texttt{positivity}, \texttt{gcongr}, \texttt{linarith}, \texttt{nlinarith}. \\
+\texttt{prob\_simp} & Probability normalization rewrites. Runs \texttt{simp} against the \texttt{@[prob\_simp]} set with \texttt{push\_cast}/\texttt{norm\_cast} fallback. Aliased as \texttt{pdf\_simp}. \\
+\texttt{anytime\_valid} & Closes Ville-type maximal inequalities for confidence sequences. Three variants: countable-time, finite-horizon, and explicit-witness. \\
+\texttt{z3\_check} & Linear-real-arithmetic Z3 oracle with \texttt{linarith} reconstruction. Kernel-checked. \\
 \bottomrule
 \end{tabular}
 \caption{The five \texttt{pythia} tactics. \texttt{pythia} is the
-default entry point. The four specialized tactics are exposed for
+default entry point. The four specialised tactics are exposed for
 direct invocation when the user knows the goal shape.}
 \label{tab:tactic-surface}
 \end{table}
 
-% TODO: each tactic deserves a one-paragraph design note. asabi to draft.
-
 \paragraph{\texttt{pythia} (top-level dispatcher).}
-The default entry point. Tries the registered statistical lemma
-database, then the named aesop ruleset \texttt{Pythia}, then
-\texttt{linarith}. The fall-through ordering is fixed. The lemma
-database and aesop ruleset are user-extensible.
+The default entry point. Runs aesop with the \texttt{Pythia} aesop
+ruleset, which contains every theorem tagged
+\texttt{@[stat\_lemma]}. On aesop failure, falls through to a
+short cleanup chain combining \texttt{simp}, \texttt{omega},
+\texttt{linarith}, and \texttt{positivity}. The fall-through
+ordering is fixed. The lemma database and aesop ruleset are
+user-extensible.
 
 \paragraph{\texttt{stats\_ineq}.}
 Discharges sub-Gaussian, sub-gamma, Bernstein-Bennett, and
-Hoeffding-shape inequalities. The lemma set is registered via
-\texttt{@[stats\_ineq]}. Reconstruction is internal Lean and
-axiom-clean.
+Hoeffding-style inequalities. The \texttt{@[stats\_ineq]} attribute
+re-tags a lemma with Mathlib's \texttt{@[bound]}, so the
+\texttt{stats\_ineq} tactic dispatches via Mathlib's \texttt{bound}
+infrastructure first, then \texttt{positivity}, \texttt{gcongr},
+\texttt{linarith}, and \texttt{nlinarith} in that order.
+Reconstruction is internal Lean and axiom-clean.
 
 \paragraph{\texttt{prob\_simp}.}
-Probability-domain rewrite set. Pushes integrals through linear
-operators, splits indicator products, and reduces martingale
-expressions to MGF form for downstream use by
-\texttt{stats\_ineq}. The rewrite set is registered via
-\texttt{@[prob\_simp]}.
+Probability-domain rewrite tactic. The \texttt{@[prob\_simp]}
+attribute forwards lemmas to \texttt{@[simp]} and additionally
+records the declaration name in a scoped extension for
+introspection. The tactic runs \texttt{simp} against the resulting
+set with a \texttt{push\_cast} / \texttt{norm\_cast} coercion
+fallback for ENNReal / NNReal / Real bridge. The \texttt{pdf\_simp}
+syntax is a literal alias. Both forms expand to the same kernel
+trace.
 
 \paragraph{\texttt{anytime\_valid}.}
-Closes Ville-type maximal-inequality goals. Specializes to the
-Howard-Ramdas \citep{howard2021time}, betting
-\citep{waudbysmith2024estimating}, and vector
-\citep{whitehouse2025timeuniform} families, dispatching by goal
-shape. The case-split table is small (currently four families) and
-hard-coded. Future families register via \texttt{@[anytime\_valid]}.
+Closes Ville-type maximal-inequality goals for non-negative
+supermartingales. The dispatch ladder tries direct
+\texttt{ville\_supermartingale} application paths first (countable-time
+\texttt{first} with \texttt{exact}/\texttt{refine} variants), then
+the finite-horizon and explicit-witness specialisations, and finally
+aesop against the named ruleset
+\texttt{Pythia.AnytimeValid}. Three syntactic variants are exposed:
+the bare form \texttt{anytime\_valid} (countable-time),
+\texttt{anytime\_valid (horizon := N)} (finite-horizon, requiring
+\texttt{IsProbabilityMeasure} but no integrability), and
+\texttt{anytime\_valid using h} (explicit supermartingale witness).
+New families register via \texttt{@[anytime\_valid\_lemma]}.
 
 \paragraph{\texttt{z3\_check}.}
 External Z3 oracle for linear real arithmetic, with
-\texttt{linarith} reconstruction inside Lean. Z3 supplies the proof
-witness. \texttt{linarith} reconstructs the witness step inside
-the kernel. The kernel is the final word. Z3 cannot smuggle axioms.
-This follows the CoqHammer reconstruction pattern
+\texttt{linarith} reconstruction inside Lean. Z3 supplies an
+unsat-of-negation verdict. \texttt{linarith} reconstructs the
+proof term inside the kernel. The kernel is the final word. If
+Z3 says unsat but \texttt{linarith} cannot reconstruct, the tactic
+fails loud rather than silently trusting Z3. Z3 cannot smuggle
+axioms. This follows the CoqHammer reconstruction pattern
 \citep{czajkakaliszyk2018coqhammer}.
 
 \subsection{Registry attributes}
 \label{sec:tactic-surface-registries}
 
-The library uses three attribute-driven registries:
+The library uses four attribute-driven registries:
 
 \begin{itemize}[leftmargin=1.3em,itemsep=0.2em]
 \item \texttt{@[stat\_lemma]}: lemma database for the top-level
-  \texttt{pythia} dispatcher.
-\item \texttt{@[stats\_ineq]}: tail-bound and concentration
-  lemmas dispatched by \texttt{stats\_ineq}.
-\item \texttt{@[prob\_simp]}: probability rewrite rules dispatched
-  by \texttt{prob\_simp}.
+  \texttt{pythia} dispatcher. Internally a thin wrapper for
+  \texttt{@[aesop safe apply (rule\_sets := [Pythia])]}.
+\item \texttt{@[stats\_ineq]}: tail-bound and concentration lemmas.
+  Forwards to Mathlib's \texttt{@[bound]} attribute and additionally
+  records the name for the \texttt{\#stats\_ineqs} introspection
+  command.
+\item \texttt{@[prob\_simp]}: probability rewrite rules. Forwards to
+  \texttt{@[simp]} and records the name for \texttt{\#prob\_simps}.
+\item \texttt{@[anytime\_valid\_lemma]}: Ville-style closers and
+  admissibility lemmas, populating the
+  \texttt{Pythia.AnytimeValid} aesop ruleset.
 \end{itemize}
 
+A fifth attribute, \texttt{@[cs\_family]}, is a typed-declaration
+tag rather than a tactic registry: it marks a \texttt{CSFamily}
+record so it appears in the \texttt{\#cs\_families} catalogue.
 User extensions consist of tagging library lemmas with the
 appropriate attribute. No fork is required.
 
 \subsection{The \texttt{Pythia} aesop ruleset}
 \label{sec:tactic-surface-aesop}
 
-The library declares a named aesop ruleset \texttt{Pythia} containing
-the registered \texttt{stat\_lemma} entries. Direct invocation is
-supported via \texttt{aesop (rule\_sets := [Pythia])}, equivalent to
-the \texttt{pythia} dispatcher's middle stage. This gives users a
-finer-grained interface when the dispatcher's outer wrapping is not
-desired.
+The library declares two named aesop rule sets: \texttt{Pythia}
+(populated by \texttt{@[stat\_lemma]}) and \texttt{Pythia.AnytimeValid}
+(populated by \texttt{@[anytime\_valid\_lemma]}). Direct invocation
+is supported via \texttt{aesop (rule\_sets := [Pythia])}, equivalent
+to the inner aesop call inside the \texttt{pythia} dispatcher. This
+gives users a finer-grained interface when the dispatcher's outer
+wrapping is not desired.
 
 \subsection{Architecture}
 \label{sec:tactic-surface-arch}
 
-% TODO: insert TikZ figure. Sketch:
-%   goal -> [registry lookup, three attribute-driven sets]
-%        -> [aesop (rule_sets := [Pythia])]
-%        -> [linarith fall-through]
-%   side-channel: z3_check (separate user-invoked tactic, not
-%   part of the pythia dispatcher chain).
 \begin{figure}[h]
 \centering
-\framebox[0.95\columnwidth]{\parbox{0.85\columnwidth}{
-\textbf{Architecture (TODO: replace with TikZ).}
-The \texttt{pythia} dispatcher tries the
-\texttt{@[stat\_lemma]} database first, then the
-\texttt{Pythia} aesop ruleset, then \texttt{linarith}. Each stage
-is independently Lean-kernel-checked. \texttt{z3\_check} is a
-separate user-invoked tactic with its own
-linarith-based reconstruction step, not part of the dispatcher
-chain.
-}}
-\caption{The \texttt{pythia} dispatcher chain. Three stages, each
-kernel-checked independently. \texttt{z3\_check} sits outside the
-chain.}
+\input{figures/arch-figure}
+\caption{The \texttt{pythia} dispatcher chain. Two stages, each
+kernel-checked independently. Stage 1 is aesop against the
+\texttt{Pythia} ruleset (populated by \texttt{@[stat\_lemma]}).
+Stage 2 is the cleanup chain. \texttt{z3\_check} is a separate
+user-invoked tactic with its own \texttt{linarith}-based
+reconstruction step, not part of the dispatcher chain.}
 \label{fig:arch}
 \end{figure}
 
 \paragraph{Why this shape.}
-The three-stage chain mirrors the empirical structure of statistical
-proofs in our library: many goals close on a single lemma application
-(stage 1), some require forward search through a lemma set (stage 2),
-some reduce to a linear arithmetic obligation after the rewrite
-(stage 3). Routing by goal shape is not necessary at the top level.
-The cost of trying stages in order is small relative to the cost of
-incorrect early termination.
-
-% TODO: add brief usage example. asabi to draft 5-10 line code block
-% showing pythia closing a Hoeffding instance.
+The two-stage chain mirrors the empirical structure of statistical
+proofs in our library. Many goals close on a single registered
+lemma application or a short aesop search at stage 1. The remainder
+reduce to a linear or arithmetic obligation after rewriting, which
+the cleanup chain at stage 2 handles. Routing by goal shape is not
+necessary at the top level. The cost of trying stages in order is
+small relative to the cost of incorrect early termination.

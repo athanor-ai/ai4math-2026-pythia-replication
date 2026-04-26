@@ -56,10 +56,12 @@
 \usepackage[capitalize,noabbrev]{cleveref}
 \usepackage{listings}
 \usepackage{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta}
 \usepackage{enumitem}
 \usepackage{float}
 \usepackage[section]{placeins}
-\setlength{\emergencystretch}{3em}
+\setlength{\emergencystretch}{6em}
 
 \theoremstyle{plain}
 \newtheorem{theorem}{Theorem}[section]
@@ -121,8 +123,10 @@
 \input{sections/aristotle}
 \input{sections/discussion}
 
+{\sloppy
 \bibliographystyle{icml2025}
 \bibliography{references}
+}
 
 \input{sections/appendix}
 

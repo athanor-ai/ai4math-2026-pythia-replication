@@ -6,19 +6,20 @@
 
 \paragraph{aesop.}
 Aesop \citep{aesop2023} is the workhorse forward-search tactic in
-Lean 4. \texttt{pythia} declares a named aesop ruleset and uses
-aesop in stage 2 of the dispatcher chain. \texttt{pythia} is not a
-replacement for aesop. It is a statistics-domain registry plus a
-Z3 oracle plus a vacuous-closure audit, layered on top of aesop.
+Lean 4. \texttt{pythia} declares two named aesop rule sets
+(\texttt{Pythia} and \texttt{Pythia.AnytimeValid}) and uses aesop in
+stage 1 of the dispatcher chain. \texttt{pythia} is not a replacement
+for aesop. It is a statistics-domain registry plus a Z3 oracle plus a
+vacuous-closure audit, layered on top of aesop.
 
 \paragraph{Sledgehammer.}
 Sledgehammer \citep{paulsonblanchette2010threeyears,
 blanchettesledgehammer2011} dispatches Isabelle/HOL goals to external
 ATPs (Vampire, E, Z3, CVC4) and reconstructs the proof. There is no
 direct Lean 4 equivalent. \texttt{pythia} addresses the
-statistics-domain case via \texttt{z3\_check} for linear-real-arithmetic and
-Aristotle as a structural oracle. A general-purpose Lean
-Sledgehammer is out of scope for this paper.
+statistics-domain case via \texttt{z3\_check} for
+linear-real-arithmetic and Aristotle as a structural oracle. A
+general-purpose Lean Sledgehammer is out of scope for this paper.
 
 \paragraph{CoqHammer.}
 CoqHammer \citep{czajkakaliszyk2018coqhammer} dispatches Coq goals
@@ -33,43 +34,56 @@ selection.
 Mathlib supplies \texttt{linarith}, \texttt{polyrith},
 \texttt{nlinarith}, \texttt{positivity}, \texttt{measurability},
 \texttt{bound}, \texttt{gcongr}. None of these is a statistics-domain
-hammer. \texttt{pythia} composes with all of them. The fall-through
-to \texttt{linarith} in stage 3 of the dispatcher chain is the
-explicit composition.
+hammer. \texttt{stats\_ineq} is the closest \texttt{pythia} relative
+of the Mathlib \texttt{bound} family: the
+\texttt{@[stats\_ineq]} attribute re-tags lemmas as
+\texttt{@[bound]}, so \texttt{bound}'s mature dispatch picks them up
+automatically. \texttt{pythia} composes with all of the listed
+Mathlib tactics. The fall-through chain at stage 2 of the dispatcher
+combines \texttt{simp}, \texttt{omega}, \texttt{linarith}, and
+\texttt{positivity}. The chain is the explicit composition.
 
 \subsection{Aristotle vs DSPv2 vs Opus 4.6 (illustrative)}
 \label{sec:discussion-comparison-empirical}
 
-% TODO: pull 3-4 problems from FormalAVS where Aristotle closes
-% and hand-Mathlib alone does not. asabi to populate from
-% neurips-2026-dataset-paper tables.
-
-Table~\ref{tab:illustrative-comparison} reports a small subset of
-FormalAVS problems \citep{anonymous2026formalavs} on which
-Aristotle, DSPv2 (a fine-tuned local-GPU drafter), and Opus 4.6
-(an API model) were each given a single attempt. The full benchmark
-numbers are in the dataset paper. The point of this subset is to
-illustrate the regime in which Aristotle as oracle closes problems
-that hand-Mathlib alone does not. Per-problem solve outcomes (close
-or open) are kernel-checked.
+Table~\ref{tab:illustrative-comparison} reports four FormalAVS
+problems \citep{anonymous2026formalavs} on which Aristotle, DSPv2
+(DSPv2-7B GPTQ-int8, a quantised local-GPU prover), and Opus 4.6 (an
+API generalist drafter) were each given a single-attempt protocol
+(Aristotle is one session per problem. DSPv2 and Opus run pass@5
+at $N=5$ on the $48$-slate.) The full benchmark numbers are in the
+dataset paper. The
+point of this subset is to expose the four solver regimes that the
+benchmark tail surfaces. Per-problem solve outcomes are
+kernel-checked.
 
 \begin{table}[h]
 \centering
 \small
+\resizebox{\columnwidth}{!}{%
 \begin{tabular}{lccc}
 \toprule
 \textbf{Problem} & \textbf{Aristotle} & \textbf{DSPv2} & \textbf{Opus 4.6} \\
 \midrule
-% TODO: replace placeholders with real solve/no-solve outcomes
-% from the FormalAVS subset chosen for this illustrative comparison.
-combine\_eprocesses\_avg & TODO & TODO & TODO \\
-ville\_bound\_betting & TODO & TODO & TODO \\
-matrix\_bernstein\_step & TODO & TODO & TODO \\
-bretagnolle\_huber\_binary & TODO & TODO & TODO \\
+\texttt{betting\_is\_kelly\_optimal}\textsuperscript{$\star$}      & $1/1$ & n/a    & n/a    \\
+\texttt{etavector\_eq\_sqrt\_two\_mul\_etahr}      & $1/1$ & $1/5$  & $0/5$ \\
+\texttt{c\_sharp\_ranking}                         & $1/1$ & $0/5$  & $0/5$ \\
+\texttt{equivalence\_break\_at} \texttt{\_finite\_precision} & $0/3$\textsuperscript{$\dagger$} & $0/5$ & $0/5$ \\
 \bottomrule
-\end{tabular}
-\caption{Illustrative subset of FormalAVS. Solve outcomes
-(close vs open) per single attempt. Full benchmark numbers in
+\end{tabular}%
+}
+\caption{Illustrative four-problem subset of FormalAVS. Each cell is
+\emph{(closures)/(attempts)}. Aristotle is one session per problem.
+DSPv2 and Opus are pass@5 at $N{=}5$. The four rows expose four
+distinct solver regimes: universal closure (top), majority closure
+(\texttt{etavector}, the $\sqrt{2}$ identity Kimi and Mistral also
+close at $N{=}5$), Aristotle-monopoly (\texttt{c\_sharp\_ranking}),
+and solver-unreached frontier (\texttt{equivalence\_break}).
+\textsuperscript{$\star$}Companion-archive entry, not in the
+$48$-slate drafter sweep, included for the universal regime.
+\textsuperscript{$\dagger$}Aristotle returned a counterexample on the
+as-stated form (missing symmetry hypothesis). The corrected form
+remains open. Full per-tier benchmark numbers in
 \citet{anonymous2026formalavs}.}
 \label{tab:illustrative-comparison}
 \end{table}

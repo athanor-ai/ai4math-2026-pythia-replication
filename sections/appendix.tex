@@ -3,120 +3,256 @@
 \section{Library inventory}
 \label{sec:appendix-inventory}
 
-% TODO: full theorem-by-theorem inventory of the pythia library at
-% the AI4MATH submission cut. asabi to populate after sleep, drawing
-% from the public pythia repo's module headers.
-
-The shipped library at the AI4MATH 2026 submission cut spans
-twelve modules. Theorems below are listed with module path,
-one-line statement, and axiom-audit status.
+The shipped library at the AI4MATH 2026 submission cut spans the
+modules below. Each line lists module path and one-line summary.
+All listed modules are axiom-clean against
+$\mathcal{A}_{\text{core}} = \{\texttt{propext},
+\texttt{Classical.choice}, \texttt{Quot.sound}\}$ unless explicitly
+flagged as scaffold.
 
 \subsection{Anytime-valid inference}
 \begin{itemize}[leftmargin=1.3em,itemsep=0.2em]
-\item \texttt{Pythia.AnytimeValid.HowardRamdasCS}: Howard-Ramdas
-  Ville bound for self-normalized confidence sequences. (TODO:
-  exact theorem name + statement.) Axiom-clean.
-\item \texttt{Pythia.AnytimeValid.BettingCS}: betting-CS coverage
-  certificate. (TODO: exact.) Axiom-clean.
-\item \texttt{Pythia.AnytimeValid.}\allowbreak\texttt{combine\_eprocesses\_avg}:
-  e-process average-merge. (TODO: exact.) Axiom-clean.
+\item \texttt{Pythia.HowardRamdasCS}: Howard-Ramdas Ville bound for
+  self-normalised confidence sequences (rate
+  $\eta_{\mathrm{HR}}(b) = \sqrt{b \log 2}$). Axiom-clean.
+\item \texttt{Pythia.BettingCS}: betting-CS coverage certificate
+  (rate $\eta_{\mathrm{betting}}(b) = 1/\sqrt{b\log 2 + 1}$).
+  Axiom-clean.
+\item \texttt{Pythia.BettingStrategy}: betting-strategy admissibility
+  scaffolding for the \texttt{anytime\_valid} dispatch.
+\item \texttt{Pythia.VilleSupermartingale}: countable-time and
+  finite-horizon Ville inequalities. The
+  \texttt{ville\_supermartingale}, \texttt{ville\_ineq}, and
+  \texttt{ville\_supermartingale\_finite} lemmas are the workhorse.
+\item \texttt{Pythia.EDetector}: e-process formalism, with
+  \texttt{combine\_eprocesses\_avg} (average-merge) as the workhorse
+  closer. Anytime-valid Type-I error control via Markov-at-stopping.
 \end{itemize}
 
 \subsection{Concentration}
 \begin{itemize}[leftmargin=1.3em,itemsep=0.2em]
-\item \texttt{Pythia.Concentration.SubGaussian}: sub-Gaussian
-  tail bound (Hoeffding-style). Axiom-clean.
-\item \texttt{Pythia.Concentration.SubGamma}: sub-gamma tail
+\item \texttt{Pythia.SubGaussianMG}: sub-Gaussian martingale
+  concentration. The Chernoff exponent $\exp(-\tau^2/(2\sigma^2 N))$
   bound. Axiom-clean.
-\item \texttt{Pythia.Concentration.}\allowbreak\texttt{BernsteinBennett}: variance-aware
-  MGF bridge. Axiom-clean.
+\item \texttt{Pythia.SubGamma}: sub-gamma tail bound. Axiom-clean.
+\item \texttt{Pythia.MGFBoundedSubGamma}: bounded-RV
+  Bernstein-Bennett MGF bound,
+  $\mathbb{E}[\exp(\lambda X)]
+   \leq \exp(\sigma^2 \lambda^2 / (2(1 - b\lambda/3)))$
+  for centred $|X| \leq b$. Axiom-clean.
+\item \texttt{Pythia.Bernstein}: iid and martingale Bernstein
+  applications.
 \end{itemize}
 
-\subsection{Matrix concentration (scaffold)}
+\subsection{Matrix concentration}
 \begin{itemize}[leftmargin=1.3em,itemsep=0.2em]
-\item \texttt{Pythia.Matrix.Lieb}: Lieb concavity inequality
-  scaffold \citep{lieb1973}. (TODO: which dependent obligations
-  remain.)
-\item \texttt{Pythia.Matrix.Bernstein}: matrix-Bernstein scaffold
-  \citep{tropp2012usermatrix}. (TODO.)
+\item \texttt{Pythia.MatrixLieb}: Lieb concavity step
+  \citep{lieb1973} and operator-monotone log composition. Scaffold.
+  Dependent operator-trace inequalities route to Aristotle.
+\item \texttt{Pythia.MatrixBernstein}: iid matrix-Bernstein head
+  theorem \citep{tropp2012usermatrix}. Scaffold.
+\item \texttt{Pythia.MatrixBernsteinFull}: martingale extension.
+  Scaffold.
 \end{itemize}
 
 \subsection{Other modules}
 \begin{itemize}[leftmargin=1.3em,itemsep=0.2em]
 \item \texttt{Pythia.Control.LyapunovDiscrete}: discrete-time
-  Lyapunov stability.
-\item \texttt{Pythia.Queueing.ErlangB},
-  \texttt{Pythia.Queueing.LittlesLaw}: queueing primitives.
-\item \texttt{Pythia.TimeSeries.Wold} \citep{wold1938}.
-\item \texttt{Pythia.Risk.CVaR}
-  \citep{rockafellaruryasev2000}.
-\item \texttt{Pythia.Asymptotics.DeltaMethod}: scalar and multivariate.
-\item \texttt{Pythia.InfoTheory.BretagnolleHuber}: binary case.
+  Lyapunov stability for linear systems.
+\item \texttt{Pythia.Queueing.ErlangB}: Erlang-B blocking formula.
+\item \texttt{Pythia.Queueing.LittlesLaw}: Little's law steady-state
+  identity.
+\item \texttt{Pythia.TimeSeries.} \texttt{WoldDecomposition} \citep{wold1938}.
+\item \texttt{Pythia.Risk.CVaR} \citep{rockafellaruryasev2000}: the
+  Rockafellar-Uryasev variational characterisation of CVaR.
+\item \texttt{Pythia.Asymptotics.DeltaMethod},
+  \texttt{Pythia.Asymptotics.} \texttt{DeltaMethodMulti}: scalar and
+  multivariate delta method.
+\item \texttt{Pythia.InfoTheory.} \texttt{BretagnolleHuberBinary}: binary-case
+  total-variation bound via the Bhattacharyya bridge.
+\item \texttt{Pythia.MeasureTheory.} \texttt{OptionalStoppingUnbounded},
+  \texttt{Pythia.MeasureTheory.PathMeasureRN}: structural support
+  for the Ville chain.
 \end{itemize}
 
 \section{Worked examples}
 \label{sec:appendix-worked}
 
-% TODO: 3-4 worked examples. Lean code blocks via lstlisting. asabi
-% to draft after pulling actual proofs from the public pythia repo.
+Each example below is a literal regression test from the
+\texttt{pythia} test suite. Every \texttt{example} compiles
+axiom-clean against $\mathcal{A}_{\text{core}}$.
 
 \subsection{anytime\_valid: Ville-bound closer}
 \label{sec:appendix-worked-av}
 
-% TODO: take a 5-line Howard-Ramdas Ville-bound goal, show the
-% pre-tactic and post-tactic state, walk through the registry hit.
+The countable-time variant closes the canonical Ville maximal
+inequality on a non-negative supermartingale.
+
+\begin{lstlisting}
+import Pythia.Tactic.AnytimeValid
+open MeasureTheory ProbabilityTheory ENNReal Pythia
+
+example {Omega : Type*} {m0 : MeasurableSpace Omega}
+    {mu : Measure Omega} [IsFiniteMeasure mu]
+    {f : Nat -> Omega -> Real}
+    {F : Filtration Nat m0}
+    (hsup : Supermartingale f F mu)
+    (hnn  : forall t omega, 0 <= f t omega)
+    (hint : Integrable (f 0) mu)
+    {c : Real} (hc : 0 < c) :
+    mu {omega | exists t : Nat, f t omega >= c}
+      <= (Integral.integral mu (f 0)).toNNReal / c.toNNReal := by
+  anytime_valid
+\end{lstlisting}
+
+The tactic dispatches via the
+\texttt{ville\_supermartingale} \texttt{exact} path. Hypotheses are
+discharged by \texttt{assumption}. No registered rule is consulted.
+The kernel-checked term reduces under
+$\{\texttt{propext}, \texttt{Classical.choice}, \texttt{Quot.sound}\}$.
 
 \subsection{z3\_check: linear-real-arithmetic with reconstruction}
 \label{sec:appendix-worked-z3}
 
-% TODO: linear inequality goal, show the Z3 witness, show the
-% linarith reconstruction, show the kernel-check axiom audit.
+A three-step linear chain over $\mathbb{R}$. Z3 is queried as a
+ranking filter. \texttt{linarith} produces the actual proof term.
+
+\begin{lstlisting}
+import Pythia.Tactic.Z3Check
+open Pythia
+
+example {a b c : Real} (h1 : a < b) (h2 : b <= c) :
+    a < c := by
+  z3_check
+\end{lstlisting}
+
+Trace: the encoder produces the SMT-LIB query
+\texttt{(set-logic QF\_LRA) ... (assert (< v\_a v\_b)) (assert
+(<= v\_b v\_c)) (assert (not (< v\_a v\_c))) (check-sat)}, which Z3
+returns \texttt{unsat}. \texttt{linarith} then constructs the
+Farkas certificate inside Lean. Z3 cannot smuggle axioms. If
+\texttt{linarith} disagreed, the tactic would fail loud.
 
 \subsection{pythia: chain-rule fall-through to aesop}
 \label{sec:appendix-worked-pythia-fall}
 
-% TODO: a goal that misses stage 1 (no registered lemma matches),
-% closes at stage 2 (aesop ruleset Pythia hits a chain).
+A goal with no matching \texttt{@[stat\_lemma]} but a closed-form
+chain in \texttt{linarith}. Stage 1 (aesop with the \texttt{Pythia}
+ruleset) declines. Stage 2 (the cleanup chain combining
+\texttt{simp}, \texttt{omega}, \texttt{linarith}, and
+\texttt{positivity}) closes.
 
-\subsection{combine\_eprocesses\_avg: axiom-clean closure walkthrough}
-\label{sec:appendix-worked-edet}
+\begin{lstlisting}
+import Pythia.Tactic.Pythia
+open Pythia
 
-% TODO: full walkthrough of the average-merge proof. Show the axiom
-% audit transcript at the end.
+example (a b c d : Real)
+    (h1 : a <= b) (h2 : b <= c) (h3 : c <= d) :
+    a <= d := by
+  pythia
+\end{lstlisting}
+
+The dispatcher's \texttt{first}-combinator tries aesop, observes no
+applicable \texttt{@[stat\_lemma]} closer, then tries the cleanup
+chain. \texttt{linarith} closes the chain in one step.
+
+\subsection{Registry-extend: tagging a user theorem}
+\label{sec:appendix-worked-extend}
+
+User extensions consist of tagging library lemmas with the
+appropriate attribute. Below: a trivial real-arithmetic identity
+registered for \texttt{pythia} via \texttt{@[stat\_lemma]}.
+
+\begin{lstlisting}
+import Pythia.Tactic.Pythia
+open Pythia
+
+@[stat_lemma]
+theorem add_zero_real (x : Real) : x + 0 = x := by ring
+
+-- pythia now closes goals matching the registered lemma:
+example (x y : Real) : (x + 0) + (y + 0) = x + y := by
+  pythia
+\end{lstlisting}
+
+The attribute re-elaborates as
+\texttt{@[aesop safe apply (rule\_sets := [Pythia])]}. The lemma
+then joins the \texttt{Pythia} aesop ruleset and is consulted by
+\texttt{pythia} on every subsequent invocation. No fork or rebuild
+of the tactic implementation is required.
 
 \section{Aristotle vs DSPv2 vs Opus 4.6 (wider subset)}
 \label{sec:appendix-comparison}
 
-% TODO: wider table from FormalAVS \citep{anonymous2026formalavs}.
-% Pull from the dataset paper rather than re-running. 15-30 problems
-% would be a sensible illustrative scope; full numbers cite the
-% dataset paper. asabi to populate.
-
-Table~\ref{tab:wide-comparison} reports the wider subset.
+Table~\ref{tab:wide-comparison} reports a wider subset of FormalAVS
+\citep{anonymous2026formalavs} per-tier closure rates for the three
+solver families. Aristotle is one-attempt-per-target. DSPv2 and Opus
+are pass@5 at $N{=}5$ on the $48$-target slate (T0 through T2 plus T3).
+Cells are \emph{(closures)/(targets)} at the tier denominator, with
+T4 (library-gap) and T5 (capability-ceiling) appended.
 
 \begin{table}[h]
 \centering
 \small
-\begin{tabular}{lccc}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{lcccccc}
 \toprule
-\textbf{Problem} & \textbf{Aristotle} & \textbf{DSPv2} & \textbf{Opus 4.6} \\
+\textbf{Solver} & T0 & T1 & T2 & T3 & T4 & T5 \\
 \midrule
-% TODO: 15-30 rows from FormalAVS subset. Cite dataset paper for
-% the full comparison.
-\multicolumn{4}{c}{TODO: populate from \citep{anonymous2026formalavs}} \\
+Aristotle              & 7/7 & 33/34 & 7/8 & 6/6 & 0/4 & 0/1 \\
+DSPv2-7B GPTQ-int8     & 3/7 & 8/34  & 0/8 & 1/6 & 0/4 & 0/1 \\
+Opus 4.6               & 0/7 & 13/34 & 0/8 & 0/6 & 0/4 & 0/1 \\
 \bottomrule
-\end{tabular}
-\caption{Wider subset from FormalAVS. Solve outcomes per single
-attempt. Full benchmark numbers in \citet{anonymous2026formalavs}.}
+\end{tabular}%
+}
+\caption{Wider per-tier comparison from FormalAVS. Aristotle: one
+attempt per target. DSPv2 and Opus: pass@5 at $N{=}5$. T4 is
+solver-hit-Mathlib-gap (every solver $0/4$ for the same library-gap
+reason). T5 is the all-solver capability-ceiling target. The 6/6 vs
+1/6 vs 0/6 column at T3 (cross-function inequality wall) is the
+benchmark's cleanest solver-specific signal. The single DSPv2 T3
+closure is \texttt{etavector\_eq\_sqrt\_two\_mul\_etahr} (the
+$\sqrt{2}$ identity, also closed by Kimi K2.5 and Mistral Large 3 in
+the wider drafter sweep). Source: dataset paper
+\citep{anonymous2026formalavs}, Tables 1-2 reproduced verbatim.}
 \label{tab:wide-comparison}
 \end{table}
 
+\paragraph{Per-target capability-wall tail.}
+Table~\ref{tab:wide-tail} reports the per-target closure matrix on
+the five capability-wall tail problems used in the dataset paper to
+classify solver regimes.
+
+\begin{table*}[t]
+\centering
+\small
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Target} & Aristotle & Kimi K2.5 & Sonnet 4.6 & Gemini 3 Pro \\
+\midrule
+\texttt{betting\_is\_kelly\_optimal}\textsuperscript{$\star$} & $1/1$ & $1/1$ & $1/1$ & $1/1$ \\
+\texttt{c\_vector\_eq\_sqrt\_two\_mul\_c\_HR}     & $1/1$ & $1/1$ & $0/5$ & $1/2$ \\
+\texttt{c\_sharp\_ranking}                        & $1/1$ & $0/9$ & $0/5$ & $1/3$ \\
+\texttt{quantized\_entropy\_bound}                & $1/1$ & $0/9$ & $0/5$ & $0/3$ \\
+\texttt{equivalence\_break\_at} \texttt{\_finite\_precision} & $0/3$\textsuperscript{$\dagger$} & $0/19$ & $0/15$ & $0/13$ \\
+\bottomrule
+\end{tabular}
+\caption{Per-target capability-wall tail. Cells are
+\emph{(closures)/(attempts)}. Five distinct solver regimes appear:
+universal closure, majority closure, drafter-monopoly (Gemini's
+\texttt{gcongr}-prior closes \texttt{c\_sharp\_ranking}),
+Aristotle-monopoly, and solver-unreached. Source:
+\citet{anonymous2026formalavs}, Table 4.
+\textsuperscript{$\star$}Companion-archive entry, not in the
+$48$-slate drafter sweep. \textsuperscript{$\dagger$}Aristotle: two
+sessions timed out at the 20-minute compute gate. One returned a
+counterexample on the as-stated form (missing symmetry hypothesis,
+\citep{anonymous2026formalavs} \S Aristotle-refute).}
+\label{tab:wide-tail}
+\end{table*}
+
 \section{Reproduction}
 \label{sec:appendix-repro}
-
-% TODO: anonymise URLs for double-blind. Camera-ready will list
-% the public pythia repo URL and the corresponding dataset paper
-% repository. For submission, write "url redacted".
 
 \paragraph{Toolchain pin.}
 Lean 4.28 + Mathlib v4.28.0. The repository's
@@ -125,6 +261,8 @@ Mathlib dependency in \texttt{lakefile.toml} pins the v4.28.0 release
 tag.
 
 \paragraph{Build.}
+The library URL is redacted for double-blind review (full URL in
+camera-ready). Reproduction commands once the URL is supplied:
 \begin{verbatim}
 git clone <pythia-url-redacted>
 cd pythia
@@ -141,18 +279,62 @@ Any deviation fails the audit.
 \paragraph{FormalAVS benchmark.}
 The full benchmark is reported in
 \citet{anonymous2026formalavs}. Reproduction commands for the
-benchmark are in that paper's reproduction appendix.
+benchmark are in that paper's reproduction appendix. The benchmark
+URL is redacted for double-blind review.
 
-\section{Related related-work, extended}
+\section{Related work, extended}
 \label{sec:appendix-related}
 
-% TODO: extended related-work. Touch on:
-%   - Lean 4 tactic infrastructure (aesop, simp, linarith, polyrith,
-%     nlinarith, positivity, measurability, bound, gcongr).
-%   - Sledgehammer / Isabelle automation.
-%   - CoqHammer + premise selection literature.
-%   - Statistical proof formalization (mathlib/Probability,
-%     Compcert-style stat libraries, Coq's mathcomp.analysis).
-%   - LeanDojo / proof-state retrieval as a precedent for
-%     attribute-driven registries.
-% asabi to draft after sleep.
+\subsection{Lean 4 tactic infrastructure}
+Mathlib ships a tactic suite the \texttt{pythia} dispatcher composes
+with. \texttt{linarith} produces Farkas certificates,
+\texttt{polyrith} routes polynomial-ideal goals via Sage with
+kernel-checked reconstruction, \texttt{nlinarith} extends
+\texttt{linarith} to a small non-linear fragment, \texttt{positivity}
+discharges sign goals, \texttt{measurability} closes
+$\sigma$-algebra-membership obligations, \texttt{gcongr} discharges
+generalised-congruence monotonicity, and \texttt{bound} dispatches
+monotone-composition goals via an attribute-driven rule database.
+The closest Mathlib relative to \texttt{pythia} is \texttt{bound}:
+the \texttt{@[stats\_ineq]} attribute literally re-tags lemmas as
+\texttt{@[bound]}, so the underlying \texttt{bound} dispatch picks
+them up automatically. Aesop \citep{aesop2023} supplies the
+\texttt{rule\_sets} mechanism the \texttt{pythia} dispatcher uses.
+\texttt{pythia} is therefore a thin domain-registration layer over
+\texttt{aesop} plus a Z3 oracle.
+
+\subsection{Sledgehammer (Isabelle)}
+Sledgehammer
+\citep{paulsonblanchette2010threeyears, blanchettesledgehammer2011}
+dispatches Isabelle/HOL goals to Vampire, E, Z3, CVC4, with proof
+reconstruction inside Isabelle's kernel via Metis or
+\texttt{smt}-tactic replay. The reconstruction discipline is the
+template for both CoqHammer and \texttt{z3\_check}. There is no Lean
+4 equivalent at the time of writing. \texttt{pythia} does not
+attempt the Isabelle Sledgehammer's full premise-selection front
+end. The library ships only the linear-real-arithmetic instance via
+\texttt{z3\_check}.
+
+\subsection{CoqHammer (Coq)}
+CoqHammer \citep{czajkakaliszyk2018coqhammer} dispatches Coq goals
+to Vampire, E, Z3, CVC4 with kernel-checked reconstruction. Premise
+selection in CoqHammer is k-NN over a featurised representation of
+the Coq context. The reconstruction step is a small certifying tactic
+(\texttt{sauto}) that replays the ATP's witness inside the Coq
+kernel. \texttt{z3\_check}'s reconstruction-via-\texttt{linarith}
+mirrors this template at small scale: external prover supplies the
+verdict, in-kernel tactic supplies the proof term, kernel is the
+final arbiter. We do not claim a full Lean-side reimplementation of
+CoqHammer's premise-selection layer.
+
+\subsection{Statistical formalisation libraries}
+Mathlib's \texttt{Probability.Martingale} module supplies Doob
+decomposition and Azuma's inequality but does not instantiate the
+canonical confidence-sequence families, the per-family rate
+functions, or Ville's inequality for the betting construction.
+The \texttt{pythia} library closes that gap. The FormalAVS
+benchmark \citep{anonymous2026formalavs} measures the result.
+Coq's mathcomp.analysis and the Isabelle/HOL probability
+formalisations cover overlapping but disjoint sub-areas, and
+are not attribute-driven hammers.
+

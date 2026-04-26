@@ -1,15 +1,12 @@
 \section{Library content}
 \label{sec:library}
 
-The shipped \texttt{pythia} library covers approximately twelve
-modules grouped by domain. Every theorem in the modules listed here
-is axiom-clean against
+The shipped \texttt{pythia} library spans a tactic layer plus a
+proof-content layer of approximately twelve domain modules grouped by
+topic. Every theorem listed here is axiom-clean against
 $\{\texttt{propext}, \texttt{Classical.choice}, \texttt{Quot.sound}\}$
-under the Lean 4.28 + Mathlib v4.28.0 toolchain pin. We summarise
-groups. The appendix lists every theorem.
-
-% TODO: ensure exact module names match the public pythia repo
-% inventory. asabi to verify against the public repo URL after sleep.
+under the Lean 4.28 + Mathlib v4.28.0 toolchain pin. We summarise by
+group. The appendix lists modules in detail.
 
 \subsection{Anytime-valid inference}
 \label{sec:library-av}
@@ -17,74 +14,104 @@ groups. The appendix lists every theorem.
 Howard-Ramdas confidence sequences \citep{howard2021time}, betting-CS
 \citep{waudbysmith2024estimating}, and the vector-valued extension
 \citep{whitehouse2025timeuniform} are each backed by a Ville-bound
-specialization in \texttt{anytime\_valid}. The
-\texttt{HowardRamdasCS} and \texttt{BettingCS} modules expose the
-admissibility certificates of \citet{ramdasgrunwaldvovkshafer2023}.
+specialization in the \texttt{anytime\_valid} tactic. The
+\texttt{Pythia.HowardRamdasCS} and \texttt{Pythia.BettingCS} modules
+expose the admissibility certificates of the e-process formalism of
+\citet{ramdasgrunwaldvovkshafer2023}. The supporting Ville machinery
+lives in \texttt{Pythia.VilleSupermartingale} (countable-time and
+finite-horizon variants).
 
 \subsection{Concentration and tail bounds}
 \label{sec:library-conc}
 
 \texttt{stats\_ineq} dispatches sub-Gaussian and sub-gamma tail
-bounds, the Bernstein-Bennett MGF bridge, and Hoeffding's inequality
-for bounded random variables. The MGF bridge composes with
-\texttt{prob\_simp} for the integral side and with general Mathlib
-infrastructure (\texttt{measurability}, \texttt{integrability}) for
-side conditions.
+bounds, the Bernstein-Bennett MGF bridge, and Hoeffding-style
+inequalities for bounded random variables. Modules:
+\texttt{Pythia.SubGaussianMG} (sub-Gaussian martingale concentration),
+\texttt{Pythia.SubGamma} (sub-gamma tail bound),
+\texttt{Pythia.MGFBoundedSubGamma} (the bounded-RV Bernstein-Bennett
+MGF bound, $\mathbb{E}[\exp(\lambda X)] \leq \exp(\sigma^2 \lambda^2 /
+(2(1 - b\lambda/3)))$ for centred $|X| \leq b$), and
+\texttt{Pythia.Bernstein} (the iid and martingale Bernstein
+applications). The MGF bridge composes with \texttt{prob\_simp} for
+the integral side and with general Mathlib infrastructure
+(\texttt{measurability}, \texttt{integrability}) for side conditions.
 
 \subsection{E-detectors and merging}
 \label{sec:library-edet}
 
 The e-process formalism of
-\citet{ramdasgrunwaldvovkshafer2023,shinramdasrinaldo2024}
-yields uniform-time validity by
-combining e-processes via averaging. The \texttt{combine\_eprocesses\_avg}
-lemma is the workhorse. The surrounding scaffold registers
-average-merge and product-merge variants. Closure of the
-average-merge case is axiom-clean.
+\citet{ramdasgrunwaldvovkshafer2023, shinramdasrinaldo2024}
+yields uniform-time validity by combining e-processes via averaging.
+\texttt{Pythia.EDetector} declares \texttt{EProcess} as a non-negative
+process bounded in expectation under the null and \texttt{EDetector}
+as the first-passage stopping rule with anytime-valid Type-I error
+$\leq \alpha$. The \texttt{combine\_eprocesses\_avg} lemma (average
+merge) is the workhorse. Product-merge variants register alongside.
+The average-merge case is axiom-clean.
 
-\subsection{Matrix concentration (scaffold)}
+\subsection{Matrix concentration}
 \label{sec:library-matrix}
 
 Matrix Bernstein \citep{tropp2012usermatrix} and the Lieb concavity
-inequality \citep{lieb1973} are present as scaffold modules. The
-matrix-Bernstein head theorem currently lands as a typed statement
-with key obligations marked. The dependent
-$\sigma$-additivity step routes through Aristotle as oracle (see
-Section~\ref{sec:aristotle}).
+inequality \citep{lieb1973} are the two matrix-side modules.
+\texttt{Pythia.MatrixLieb} states the Lieb concavity step and the
+operator-monotone log composition.
+\texttt{Pythia.MatrixBernstein} carries the iid matrix-Bernstein head
+theorem. \texttt{Pythia.MatrixBernsteinFull} carries the
+matrix-martingale extension. The dependent operator-trace inequalities
+route through Aristotle as oracle (Section~\ref{sec:aristotle}).
 
 \subsection{Other domains}
 \label{sec:library-other}
 
 \begin{itemize}[leftmargin=1.3em,itemsep=0.2em]
-\item Control: \texttt{LyapunovDiscrete}, discrete-time Lyapunov
-  stability for linear systems.
-\item Queueing: \texttt{ErlangB}, \texttt{LittlesLaw}.
-\item Time series: \texttt{Wold} \citep{wold1938}.
-\item Risk: conditional value-at-risk \citep{rockafellaruryasev2000}.
-\item Asymptotics: scalar and multivariate delta method.
-\item Information theory: Bretagnolle-Huber inequality (binary case).
+\item Control: \texttt{Pythia.Control.LyapunovDiscrete} (discrete-time
+  Lyapunov stability).
+\item Queueing: \texttt{Pythia.Queueing.ErlangB} (Erlang-B blocking
+  formula), \texttt{Pythia.Queueing.LittlesLaw}.
+\item Time series: \texttt{Pythia.TimeSeries.} \texttt{WoldDecomposition}
+  \citep{wold1938}.
+\item Risk: \texttt{Pythia.Risk.CVaR}
+  \citep{rockafellaruryasev2000}, the Rockafellar-Uryasev variational
+  characterisation of conditional value-at-risk.
+\item Asymptotics: \texttt{Pythia.Asymptotics.} \texttt{DeltaMethod} and
+  \texttt{Pythia.Asymptotics.} \texttt{DeltaMethodMulti}, scalar and
+  multivariate delta method.
+\item Information theory:
+  \texttt{Pythia.InfoTheory.} \texttt{BretagnolleHuberBinary} (binary-alphabet
+  case via the Bhattacharyya bridge).
+\item Measure theory:
+  \texttt{Pythia.MeasureTheory.} \texttt{OptionalStoppingUnbounded} and
+  \texttt{Pythia.MeasureTheory.PathMeasureRN}, structural support for
+  the Ville chain.
 \end{itemize}
 
 \subsection{Five highlights}
 \label{sec:library-highlights}
 
-We name five representative results. Detailed statements appear in
+We name five representative results that exercise the tactic surface.
+Module-level statements appear in
 Appendix~\ref{sec:appendix-inventory}.
 
 \begin{enumerate}[leftmargin=1.3em,itemsep=0.2em]
 \item \textbf{Howard-Ramdas Ville bound.} The maximal inequality for
   the self-normalized confidence sequence
-  \citep{howard2021time}. Closes via \texttt{anytime\_valid}.
+  \citep{howard2021time}, in
+  \texttt{Pythia.HowardRamdasCS}. Closes via \texttt{anytime\_valid}.
 \item \textbf{Betting-CS coverage.} The supermartingale coverage
-  certificate of \citet{waudbysmith2024estimating}. Axiom-clean
-  closure.
-\item \textbf{Bernstein-Bennett MGF bridge.} Routes between the
+  certificate of \citet{waudbysmith2024estimating}, in
+  \texttt{Pythia.BettingCS}. Axiom-clean closure.
+\item \textbf{Bernstein-Bennett MGF bridge.} The bounded-RV MGF bound
+  in \texttt{Pythia.MGFBoundedSubGamma}, routing between the
   variance-aware sub-gamma tail and the Bennett MGF form.
-\item \textbf{combine\_eprocesses\_avg.} Average-merge of
-  e-processes \citep{ramdasgrunwaldvovkshafer2023,shinramdasrinaldo2024}.
-  Axiom-clean closure with full reconstruction.
+\item \textbf{combine\_eprocesses\_avg.} Average-merge of e-processes
+  \citep{ramdasgrunwaldvovkshafer2023, shinramdasrinaldo2024} in
+  \texttt{Pythia.EDetector}. Axiom-clean closure with full
+  reconstruction.
 \item \textbf{Bretagnolle-Huber binary.} The binary-case
-  total-variation lower bound on testing risk. Standard in
+  total-variation lower bound in
+  \texttt{Pythia.InfoTheory.} \texttt{BretagnolleHuberBinary}. Standard in
   information-theoretic lower-bound arguments.
 \end{enumerate}
 
@@ -93,7 +120,3 @@ The library is pinned to Lean 4.28 + Mathlib v4.28.0. The pin is
 necessary: the modules consume Mathlib's measure theory and
 probability subdirectories, which evolve quickly. We track Mathlib
 release tags rather than \texttt{master} for reproducibility.
-
-% TODO: cross-link the public pythia repo URL once asabi confirms
-% the live target. Anonymise for double-blind submission. Write
-% "url redacted, supplied in camera-ready".
