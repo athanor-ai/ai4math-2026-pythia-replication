@@ -6,9 +6,10 @@ proof-content layer of fifteen applied-math domains. The full
 manifest carries thirty-two cross-domain theorems with matched
 Python sim runners. Sim runners exercise property-based testing,
 parameter sweeps, and mutation testing. The full source tree
-declares four hundred and sixty theorem and lemma items across
-the \texttt{Pythia/} namespace. Fifty-five of these are tagged
-\texttt{@[stat\_lemma]} and registered into the headline cascade.
+declares five hundred and seventy-seven theorem and lemma items
+across the \texttt{Pythia/} namespace. Fifty-three of these are
+tagged \texttt{@[stat\_lemma]} and registered into the headline
+cascade.
 Every theorem listed here is axiom-clean against
 $\{\texttt{propext}, \texttt{Classical.choice}, \texttt{Quot.sound}\}$
 under the Lean 4.28 + Mathlib v4.28.0 toolchain pin. We summarise
@@ -105,9 +106,11 @@ companion runner.
   carries the von Neumann two-strategy minimax inequality.
 \item \textbf{Biology:} the \texttt{Bio} subpackage groups
   Hardy-Weinberg, Lotka-Volterra equilibria, and SIR conservation
-  in \texttt{Population}, plus Michaelis-Menten enzyme saturation,
-  chemical reaction network ODE conservation in
-  \texttt{MassAction}, and \texttt{Phylogenetics}.
+  in \texttt{Population}, plus Michaelis-Menten enzyme saturation
+  and \texttt{Phylogenetics}. \texttt{MassAction} is in scaffold:
+  the chemical reaction network ODE conservation theorems are
+  stated but proofs are pending Aristotle drafter
+  closures.
 \item \textbf{Chemistry:} the \texttt{Chemistry} subpackage
   carries Arrhenius rate-law positivity, Henderson-Hasselbalch
   pH monotonicity, and mass-action conservation.
@@ -134,8 +137,10 @@ companion runner.
   subpackage carries the Carnot efficiency upper bound.
 \item \textbf{Mathlib retags + actuarial:} \texttt{MathlibTags}
   retags AM-GM, Markov, and Cauchy-Schwarz with matched empirical
-  companions. The \texttt{Actuarial} subpackage groups Pareto,
-  Weibull, and LogNormal heavy-tail distributions.
+  companions (axiom-clean). The \texttt{Actuarial} subpackage
+  ships Pareto, Weibull, and LogNormal heavy-tail distributions
+  in scaffold form: signatures defined, mean / variance / median
+  / tail-bound proofs pending closure.
 \end{itemize}
 
 \subsection{Five highlights}

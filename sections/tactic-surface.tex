@@ -1,8 +1,9 @@
 \section{The pythia tactic surface}
 \label{sec:tactic-surface}
 
-\texttt{pythia} ships ten user-facing tactics, one named aesop
-ruleset, and six attribute-driven registries. The design follows
+\texttt{pythia} ships eleven user-facing tactics, two named aesop
+rulesets, and six registries (five attribute-driven plus the
+per-domain \texttt{DomainCalculator} typeclass). The design follows
 the CoqHammer pattern \citep{czajkakaliszyk2018coqhammer}: a
 domain-specific dispatcher with extensible attribute-driven lemma
 selection, a fall-through to general-purpose automation, and
@@ -11,7 +12,7 @@ headline tactic \texttt{pythia!} orchestrates the full
 deterministic ladder under one call. The other tactics are
 exposed for direct invocation when the user knows the goal shape.
 
-\subsection{Ten tactics}
+\subsection{Eleven tactics}
 \label{sec:tactic-surface-ten}
 
 \begin{table*}[t]
@@ -33,6 +34,11 @@ exposed for direct invocation when the user knows the goal shape.
     \texttt{anytime\_valid} / \texttt{stats\_ineq} /
     \texttt{prob\_simp} / oracle by goal shape, then falls through
     to the \texttt{@[stat\_lemma]} aesop ruleset. \\
+\texttt{stat\_simp}
+  & Curated probability and ENNReal simp-set. Runs
+    \texttt{simp only [stat\_simp]} with optional bracketed
+    side-condition list \texttt{stat\_simp [h\textsubscript{1}, h\textsubscript{2}]}
+    for assumption discharge. Also rung 1 of \texttt{pythia!}. \\
 \texttt{stats\_ineq}
   & Concentration and tail-bound inequalities. Dispatches via
     Mathlib's \texttt{bound}, then \texttt{positivity},
@@ -61,8 +67,8 @@ exposed for direct invocation when the user knows the goal shape.
     Catches vacuous-truth goal statements. \\
 \bottomrule
 \end{tabular}
-\caption{The ten \texttt{pythia} tactics. \texttt{pythia!} is the
-default entry point. The other nine are exposed for direct
+\caption{The eleven \texttt{pythia} tactics. \texttt{pythia!} is the
+default entry point. The other ten are exposed for direct
 invocation when the user knows the goal shape or wants a single
 rung of the ladder.}
 \label{tab:tactic-surface}
@@ -142,12 +148,17 @@ axioms. This follows the CoqHammer reconstruction pattern
 \subsection{Registry attributes}
 \label{sec:tactic-surface-registries}
 
-The library uses four attribute-driven registries:
+The library uses five attribute-driven registries plus a
+per-domain typeclass for ad-hoc dispatch:
 
 \begin{itemize}[leftmargin=1.3em,itemsep=0.2em]
 \item \texttt{@[stat\_lemma]}: lemma database for the top-level
   \texttt{pythia} dispatcher. Internally a thin wrapper for
   \texttt{@[aesop safe apply (rule\_sets := [Pythia])]}.
+\item \texttt{@[stat\_simp]}: curated probability and ENNReal simp
+  set. Members are scoped (do not pollute the global \texttt{simp}
+  set) and fire only when the \texttt{stat\_simp} tactic is invoked
+  or when rung 1 of \texttt{pythia!} dispatches.
 \item \texttt{@[stats\_ineq]}: tail-bound and concentration lemmas.
   Forwards to Mathlib's \texttt{@[bound]} attribute and additionally
   records the name for the \texttt{\#stats\_ineqs} introspection
@@ -157,13 +168,18 @@ The library uses four attribute-driven registries:
 \item \texttt{@[anytime\_valid\_lemma]}: Ville-style closers and
   admissibility lemmas, populating the
   \texttt{Pythia.AnytimeValid} aesop ruleset.
+\item \texttt{DomainCalculator} typeclass: per-domain dispatch
+  hook that lets the headline \texttt{pythia} cascade route
+  domain-tagged goals through a domain-specific calculator
+  instance without touching the central tactic implementation.
 \end{itemize}
 
-A fifth attribute, \texttt{@[cs\_family]}, is a typed-declaration
+A separate attribute, \texttt{@[cs\_family]}, is a typed-declaration
 tag rather than a tactic registry: it marks a \texttt{CSFamily}
 record so it appears in the \texttt{\#cs\_families} catalogue.
 User extensions consist of tagging library lemmas with the
-appropriate attribute. No fork is required.
+appropriate attribute or providing a \texttt{DomainCalculator}
+instance. No fork is required.
 
 \subsection{The \texttt{Pythia} aesop ruleset}
 \label{sec:tactic-surface-aesop}

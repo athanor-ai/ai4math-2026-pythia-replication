@@ -83,13 +83,12 @@ test suite catches the change. The Lean statement and the Python
 empirical model share test names and regime-of-validity
 declarations so the two specifications stay aligned.
 
-(3) \emph{A ten-tactic surface and six attribute-driven
-registries.} The headline tactic \texttt{pythia!} orchestrates a
-nine-rung deterministic ladder. The first five rungs are
-Mathlib-side: \texttt{stat\_simp} on the curated probability
-and ENNReal simp set, the
-\texttt{linarith}/\texttt{nlinarith}/\texttt{polyrith} chain,
-\texttt{positivity}, \texttt{aesop} on the registered
+(3) \emph{An eleven-tactic surface plus six registries.} The
+headline tactic \texttt{pythia!} orchestrates a nine-rung
+deterministic ladder. The first five rungs are Mathlib-side:
+\texttt{stat\_simp} on the curated probability and ENNReal simp
+set, the \texttt{linarith}/\texttt{nlinarith}/\texttt{polyrith}
+chain, \texttt{positivity}, \texttt{aesop} on the registered
 \texttt{Pythia} ruleset, and the \texttt{@[stat\_lemma]}
 shape-dispatch cascade. The next four are external decision
 procedures with kernel-checked reconstruction. Z3 and CVC5
@@ -100,9 +99,9 @@ negation. Each rung tries fail-fast with a bounded budget, and
 the first rung to close wins. The verbose variant
 \texttt{pythia?} reports the closing rung and per-rung
 wall-clock timing. The cross-prover ladder is offline-first and
-free of large language models. Six attribute-driven registries
-(\texttt{@[stat\_lemma]}, \texttt{@[stats\_ineq]},
-\texttt{@[prob\_simp]}, \texttt{@[stat\_simp]},
+free of large language models. Six registries
+(\texttt{@[stat\_lemma]}, \texttt{@[stat\_simp]},
+\texttt{@[stats\_ineq]}, \texttt{@[prob\_simp]},
 \texttt{@[anytime\_valid\_lemma]}, plus the per-domain
 \texttt{DomainCalculator} typeclass) let users register new
 lemmas. The headline tactic dispatches them automatically.
