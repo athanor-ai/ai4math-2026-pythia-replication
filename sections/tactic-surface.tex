@@ -1,33 +1,42 @@
 \section{The pythia tactic surface}
 \label{sec:tactic-surface}
 
-\texttt{pythia} ships five user-facing tactics, one named aesop
-ruleset, and four attribute-driven registries. The design follows
+\texttt{pythia} ships ten user-facing tactics, one named aesop
+ruleset, and six attribute-driven registries. The design follows
 the CoqHammer pattern \citep{czajkakaliszyk2018coqhammer}: a
 domain-specific dispatcher with extensible attribute-driven lemma
 selection, a fall-through to general-purpose automation, and
-kernel-checked reconstruction for any external-oracle steps.
+kernel-checked reconstruction for any external-oracle steps. The
+headline tactic \texttt{pythia!} orchestrates the full
+deterministic ladder under one call; the other tactics are
+exposed for direct invocation when the user knows the goal shape.
 
-\subsection{Five tactics}
-\label{sec:tactic-surface-five}
+\subsection{Ten tactics}
+\label{sec:tactic-surface-ten}
 
 \begin{table}[h]
 \centering
 \small
-\begin{tabular}{lp{4.5cm}}
+\begin{tabular}{lp{5.5cm}}
 \toprule
 \textbf{Tactic} & \textbf{Role} \\
 \midrule
-\texttt{pythia} & Top-level dispatcher. Runs aesop against \texttt{[Pythia, default]} rule sets, then a \texttt{simp; omega; linarith; positivity} cleanup chain. \\
+\texttt{pythia!} & Headline orchestrator. Walks a nine-rung deterministic ladder (\texttt{stat\_simp}; \texttt{linarith} / \texttt{nlinarith} / \texttt{polyrith}; \texttt{positivity}; \texttt{aesop[Pythia]}; \texttt{pythia} cascade; \texttt{z3\_check}; \texttt{cvc5\_check}; \texttt{vampire\_check} / \texttt{e\_check}; \texttt{disprove}). First-to-close wins. Bounded per-rung budget. \\
+\texttt{pythia?} & Verbose \texttt{pythia!}: reports the closing rung and per-rung wall-clock timing. Diagnostic use. \\
+\texttt{pythia} & Shape-dispatching cascade. Routes to \texttt{anytime\_valid} / \texttt{stats\_ineq} / \texttt{prob\_simp} / oracle by goal shape, then falls through to the \texttt{@[stat\_lemma]} aesop ruleset. \\
 \texttt{stats\_ineq} & Discharges concentration and tail-bound inequalities. Dispatches via Mathlib's \texttt{bound}, then \texttt{positivity}, \texttt{gcongr}, \texttt{linarith}, \texttt{nlinarith}. \\
 \texttt{prob\_simp} & Probability normalization rewrites. Runs \texttt{simp} against the \texttt{@[prob\_simp]} set with \texttt{push\_cast}/\texttt{norm\_cast} fallback. Aliased as \texttt{pdf\_simp}. \\
 \texttt{anytime\_valid} & Closes Ville-type maximal inequalities for confidence sequences. Three variants: countable-time, finite-horizon, and explicit-witness. \\
-\texttt{z3\_check} & Linear-real-arithmetic Z3 oracle with \texttt{linarith} reconstruction. Kernel-checked. \\
+\texttt{z3\_check} & Linear-real-arithmetic Z3 oracle with \texttt{linarith} reconstruction. \\
+\texttt{cvc5\_check} & QF\_BV / QF\_LRA via CVC5 with \texttt{bv\_decide} / \texttt{linarith} reconstruction. \\
+\texttt{vampire\_check} / \texttt{e\_check} & First-order-logic via Vampire / E with \texttt{aesop} reconstruction. \\
+\texttt{disprove} & Counterexample finder. Asks Z3 for a model of the goal's negation; on \texttt{sat}, fails the proof attempt with a concrete witness. Catches vacuous-truth goal statements. \\
 \bottomrule
 \end{tabular}
-\caption{The five \texttt{pythia} tactics. \texttt{pythia} is the
-default entry point. The four specialised tactics are exposed for
-direct invocation when the user knows the goal shape.}
+\caption{The ten \texttt{pythia} tactics. \texttt{pythia!} is the
+default entry point for new users. The other nine tactics are
+exposed for direct invocation when the user knows the goal shape
+or wants a single rung of the ladder.}
 \label{tab:tactic-surface}
 \end{table}
 

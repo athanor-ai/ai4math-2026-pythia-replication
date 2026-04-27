@@ -3,34 +3,44 @@
 Lean 4 with Mathlib ships strong general automation (\texttt{aesop},
 \texttt{simp}, \texttt{linarith}, \texttt{polyrith}, \texttt{nlinarith},
 \texttt{positivity}, \texttt{measurability}, \texttt{bound},
-\texttt{gcongr}). It does not ship a statistics-domain hammer.
-We present \texttt{pythia}, a Lean 4 tactic library that closes
-statistical-domain goals via five registered tactics:
-\texttt{pythia} (general dispatcher),
-\texttt{stats\_ineq} (concentration and tail-bound inequalities),
-\texttt{prob\_simp} (probability normalization rewrites),
-\texttt{anytime\_valid} (Ville-bound closer for confidence sequences),
-and \texttt{z3\_check} (Z3 oracle with linarith reconstruction in the
-CoqHammer style of \citet{czajkakaliszyk2018coqhammer}).
-The library ships with extensible attribute-driven registries
+\texttt{gcongr}). It does not ship a hammer for applied
+mathematics: the moment a goal mentions a martingale, a stopping
+time, a production function, an ODE Lyapunov candidate, a
+Wasserstein distance, or a quantum density operator, the generic
+tactics have nothing to apply.
+We present \texttt{pythia}, a Lean 4 tactic library for
+applied-mathematics proof automation. The headline tactic
+\texttt{pythia!} orchestrates a nine-rung deterministic ladder
+(\texttt{stat\_simp}, \texttt{linarith} / \texttt{nlinarith} /
+\texttt{polyrith}, \texttt{positivity}, \texttt{aesop} on the
+registered \texttt{Pythia} ruleset, the \texttt{@[stat\_lemma]}
+cascade, \texttt{z3\_check}, \texttt{cvc5\_check},
+\texttt{vampire\_check} / \texttt{e\_check}, and
+\texttt{disprove}); each rung tries fail-fast with a bounded
+budget; the verbose variant \texttt{pythia?} reports the closing
+rung and per-rung wall-clock timing for diagnostic use. The
+library ships ten registered tactics, attribute-driven registries
 (\texttt{@[stat\_lemma]}, \texttt{@[stats\_ineq]},
-\texttt{@[prob\_simp]}, \texttt{@[anytime\_valid\_lemma]}) and two
-named aesop rule sets, \texttt{Pythia} and
-\texttt{Pythia.AnytimeValid}.
-A library of approximately twelve modules covers anytime-valid
-confidence sequences \citep{howard2021time,waudbysmith2024estimating},
-matrix concentration scaffolds \citep{tropp2012usermatrix,lieb1973}, e-detectors
-\citep{shinramdasrinaldo2024,ramdasgrunwaldvovkshafer2023},
-queueing primitives, control Lyapunov bounds, and the binary
-Bretagnolle-Huber inequality. Every shipped theorem is
-axiom-clean against the standard Lean kernel set
-($\texttt{propext}$, $\texttt{Classical.choice}$, $\texttt{Quot.sound}$). Hard structural Mathlib gaps are routed to
-the Aristotle automated theorem prover
-\citep{harmonic2025aristotle} as an oracle, with kernel-checked
-reconstruction inside Lean and a refusal policy for vacuous-truth
-closures. The library is pinned to Lean 4.28 + Mathlib v4.28.0 and
-released open-source. Measured on a small subset of the FormalAVS
-benchmark \citep{anonymous2026formalavs}, Aristotle as oracle closes
-problems unreachable by hand-Mathlib alone. Full numbers are
-reported in the dataset paper.
+\texttt{@[prob\_simp]}, \texttt{@[stat\_simp]},
+\texttt{@[anytime\_valid\_lemma]}, plus the per-domain calculator
+typeclass), and a fifteen-domain proof library with thirty-two
+cross-domain theorems carrying matched Python sim runners
+(property-based testing, deterministic sweeps, mutation testing).
+Domains span probability and statistics, biology, chemistry,
+economics, control theory, optimal transport, quantum information,
+stochastic calculus, game theory, thermodynamics, numerical
+analysis, queueing, and operations research. Every public theorem
+is axiom-clean against the standard Lean kernel set
+($\texttt{propext}$, $\texttt{Classical.choice}$,
+$\texttt{Quot.sound}$). The cross-prover ladder is offline-first
+and LLM-free: \texttt{z3\_check} / \texttt{cvc5\_check} /
+\texttt{vampire\_check} / \texttt{e\_check} dispatch to local SMT
+and ATP binaries with kernel-checked reconstruction in the
+CoqHammer style of \citet{czajkakaliszyk2018coqhammer};
+LLM-augmented closure lives in a separate companion SDK that the
+library does not depend on. Hard structural Mathlib gaps are
+optionally routed to the Aristotle automated theorem prover
+\citep{harmonic2025aristotle} for development-time restocking, with
+audit gates against vacuous-truth closures. The library is pinned
+to Lean 4.28 + Mathlib v4.28.0 and released open-source.
 \end{abstract}

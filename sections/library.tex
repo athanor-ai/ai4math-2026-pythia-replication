@@ -2,11 +2,17 @@
 \label{sec:library}
 
 The shipped \texttt{pythia} library spans a tactic layer plus a
-proof-content layer of approximately twelve domain modules grouped by
-topic. Every theorem listed here is axiom-clean against
+proof-content layer of fifteen applied-math domains. The full
+manifest at the time of writing carries thirty-two cross-domain
+theorems with matched Python sim runners (property-based testing,
+parameter sweeps, mutation testing) plus four hundred and sixty
+total theorem and lemma declarations across the
+\texttt{Pythia/} source tree, fifty-five of which are tagged
+\texttt{@[stat\_lemma]} and registered into the headline cascade.
+Every theorem listed here is axiom-clean against
 $\{\texttt{propext}, \texttt{Classical.choice}, \texttt{Quot.sound}\}$
-under the Lean 4.28 + Mathlib v4.28.0 toolchain pin. We summarise by
-group. The appendix lists modules in detail.
+under the Lean 4.28 + Mathlib v4.28.0 toolchain pin. We summarise
+by group. The appendix lists modules in detail.
 
 \subsection{Anytime-valid inference}
 \label{sec:library-av}
@@ -62,29 +68,84 @@ theorem. \texttt{Pythia.MatrixBernsteinFull} carries the
 matrix-martingale extension. The dependent operator-trace inequalities
 route through Aristotle as oracle (Section~\ref{sec:aristotle}).
 
-\subsection{Other domains}
+\subsection{Cross-domain coverage (15 fields)}
 \label{sec:library-other}
 
+The cross-domain manifest covers fifteen fields with Lean proofs
+and matched Python sim runners. Each entry is a closed-form
+theorem with property-based-test mutation coverage in the
+companion runner.
+
 \begin{itemize}[leftmargin=1.3em,itemsep=0.2em]
-\item Control: \texttt{Pythia.Control.LyapunovDiscrete} (discrete-time
-  Lyapunov stability).
-\item Queueing: \texttt{Pythia.Queueing.ErlangB} (Erlang-B blocking
-  formula), \texttt{Pythia.Queueing.LittlesLaw}.
-\item Time series: \texttt{Pythia.TimeSeries.} \texttt{WoldDecomposition}
-  \citep{wold1938}.
-\item Risk: \texttt{Pythia.Risk.CVaR}
-  \citep{rockafellaruryasev2000}, the Rockafellar-Uryasev variational
-  characterisation of conditional value-at-risk.
-\item Asymptotics: \texttt{Pythia.Asymptotics.} \texttt{DeltaMethod} and
-  \texttt{Pythia.Asymptotics.} \texttt{DeltaMethodMulti}, scalar and
-  multivariate delta method.
-\item Information theory:
-  \texttt{Pythia.InfoTheory.} \texttt{BretagnolleHuberBinary} (binary-alphabet
-  case via the Bhattacharyya bridge).
-\item Measure theory:
-  \texttt{Pythia.MeasureTheory.} \texttt{OptionalStoppingUnbounded} and
-  \texttt{Pythia.MeasureTheory.PathMeasureRN}, structural support for
-  the Ville chain.
+\item \textbf{Probability and statistics:} the anytime-valid /
+  concentration / matrix sections above plus \texttt{Pythia.Risk.}
+  \texttt{CVaR}~\citep{rockafellaruryasev2000} and
+  \texttt{Pythia.Asymptotics.} \texttt{DeltaMethod} (scalar) /
+  \texttt{DeltaMethodMulti} (multivariate).
+\item \textbf{Information theory:} \texttt{Pythia.InfoTheory.}
+  \texttt{BretagnolleHuberBinary} (binary-alphabet bound),
+  \texttt{Pythia.InfoTheory.DataProcessing} (data-processing
+  inequality), \texttt{Pythia.InfoTheory.BinaryEntropy} (Shannon
+  binary entropy).
+\item \textbf{Stochastic calculus:}
+  \texttt{Pythia.Stochastic.ItoIsometryFiniteDim} (finite-dim Itô
+  isometry), \texttt{Pythia.BDG} (Burkholder-Davis-Gundy at
+  $p = 2$), \texttt{Pythia.MeasureTheory.}
+  \texttt{ConditionalJensen}, \texttt{Pythia.StochasticApproximation.}
+  \texttt{RobbinsSiegmund} / \texttt{RobbinsMonro} /
+  \texttt{Dvoretzky}, \texttt{Pythia.TimeSeries.WoldDecomposition}
+  \citep{wold1938}, \texttt{Pythia.TimeSeries.NeweyWest}.
+\item \textbf{Quantum information:}
+  \texttt{Pythia.Quantum.VonNeumannEntropyNonnegTwoState}
+  (qubit von Neumann entropy non-negativity).
+\item \textbf{Optimal transport:}
+  \texttt{Pythia.OptimalTransport.WassersteinDistanceNonneg}
+  (discrete L1 Wasserstein non-negativity).
+\item \textbf{Game theory:}
+  \texttt{Pythia.GameTheory.MinimaxTwoStrategyBound}
+  (von Neumann two-strategy minimax inequality).
+\item \textbf{Biology:} \texttt{Pythia.Bio.Population}
+  (Hardy-Weinberg, Lotka-Volterra equilibria, SIR conservation),
+  \texttt{Pythia.Bio.MichaelisMentenSaturation} (enzyme
+  saturation), \texttt{Pythia.Bio.MassAction} (CRN ODE
+  conservation), \texttt{Pythia.Bio.Phylogenetics}.
+\item \textbf{Chemistry:} \texttt{Pythia.Chemistry.Arrhenius}
+  (rate-law positivity), \texttt{Pythia.Chemistry.}
+  \texttt{HendersonHasselbalch} (pH monotonicity),
+  \texttt{Pythia.Chemistry.MassActionConservation}.
+\item \textbf{Economics:} \texttt{Pythia.Economics.CobbDouglas}
+  (constant returns to scale), \texttt{Pythia.Economics.CRRA}
+  (utility concavity), \texttt{Pythia.Economics.CAPM}
+  (linear pricing), \texttt{Pythia.Economics.RiskNeutralCall}
+  (non-negativity), \texttt{Pythia.Economics.Walras}
+  (excess-demand identity).
+\item \textbf{Engineering:}
+  \texttt{Pythia.Engineering.RCTimeConstant},
+  \texttt{Pythia.Engineering.SignalEnergy},
+  \texttt{Pythia.Engineering.PowerDissipation}.
+\item \textbf{Mechanical:}
+  \texttt{Pythia.Mechanical.HookeSpring}
+  (spring-potential non-negativity).
+\item \textbf{Control theory:}
+  \texttt{Pythia.Control.Lyapunov} (scalar),
+  \texttt{Pythia.Control.LyapunovDiscrete} (discrete-time),
+  \texttt{Pythia.Control.LyapunovODE}.
+\item \textbf{Operations research / queueing:}
+  \texttt{Pythia.Queueing.ErlangB},
+  \texttt{Pythia.Queueing.LittlesLaw},
+  \texttt{Pythia.OR.LittlesLaw}.
+\item \textbf{Numerical analysis:}
+  \texttt{Pythia.Numerical.NewtonQuadraticIterPos},
+  \texttt{Pythia.Numerical.PicardLindelof},
+  \texttt{Pythia.Numerical.Lyapunov},
+  \texttt{Pythia.Numerical.KKT},
+  \texttt{Pythia.Numerical.Kahan}.
+\item \textbf{Thermodynamics:}
+  \texttt{Pythia.Thermodynamics.CarnotEfficiencyUpperBound}.
+\item \textbf{Mathlib retags + actuarial:}
+  \texttt{Pythia.MathlibTags} (AM-GM, Markov, Cauchy-Schwarz with
+  empirical companions), \texttt{Pythia.Actuarial.\{Pareto,
+  Weibull, LogNormal\}}.
 \end{itemize}
 
 \subsection{Five highlights}
