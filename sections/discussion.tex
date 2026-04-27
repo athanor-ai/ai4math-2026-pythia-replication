@@ -14,12 +14,15 @@ vacuous-closure audit, layered on top of aesop.
 
 \paragraph{Sledgehammer.}
 Sledgehammer \citep{paulsonblanchette2010threeyears,
-blanchettesledgehammer2011} dispatches Isabelle/HOL goals to external
-ATPs (Vampire, E, Z3, CVC4) and reconstructs the proof. There is no
-direct Lean 4 equivalent. \texttt{pythia} addresses the
-statistics-domain case via \texttt{z3\_check} for
-linear-real-arithmetic and Aristotle as a structural oracle. A
-general-purpose Lean Sledgehammer is out of scope for this paper.
+blanchettesledgehammer2011} dispatches Isabelle/HOL goals to
+external ATPs (Vampire, E, Z3, CVC4) and reconstructs the proof.
+There is no direct Lean 4 equivalent. \texttt{pythia} addresses
+the applied-mathematics case via \texttt{z3\_check} for
+linear-real-arithmetic, \texttt{cvc5\_check} for the QF\_BV /
+QF\_LRA fragment, and \texttt{vampire\_check} / \texttt{e\_check}
+for first-order logic, with kernel-checked reconstruction inside
+Lean. A general-purpose Lean Sledgehammer remains out of scope
+for this paper.
 
 \paragraph{CoqHammer.}
 CoqHammer \citep{czajkakaliszyk2018coqhammer} dispatches Coq goals
@@ -42,71 +45,34 @@ Mathlib tactics. The fall-through chain at stage 2 of the dispatcher
 combines \texttt{simp}, \texttt{omega}, \texttt{linarith}, and
 \texttt{positivity}. The chain is the explicit composition.
 
-\subsection{Per-drafter contribution on a benchmark subset}
-\label{sec:discussion-comparison-empirical}
+\subsection{Drafter contribution to the corpus}
+\label{sec:discussion-drafter-contribution}
 
-Table~\ref{tab:illustrative-comparison} reports four FormalAVS
-problems \citep{anonymous2026formalavs} on which the four drafters
-in our swarm were each tried under a fixed protocol. Aristotle
-\citep{harmonic2025aristotle} is one session per problem.
-DeepSeek-Prover-V2 \citep{deepseekprover2024v2} (DSPv2-7B
-GPTQ-int8, a quantised local-GPU prover) and Opus 4.6 (a
-generalist API drafter) run pass@5 at $N{=}5$ on the $48$-target
-slate. The point of this subset is to expose the four
-contribution regimes the benchmark tail surfaces. None of the
-drafters dominates across the four rows. Per-problem solve
-outcomes are kernel-checked. Drafter contributions are shown to
-illustrate \emph{which} drafter helped close which theorem in
-the corpus, not to claim any drafter is a ground-truth oracle.
-
-\begin{table}[h]
-\centering
-\small
-\resizebox{\columnwidth}{!}{%
-\begin{tabular}{lccc}
-\toprule
-\textbf{Problem} & \textbf{Aristotle} & \textbf{DSPv2} & \textbf{Opus 4.6} \\
-\midrule
-\texttt{betting\_is\_kelly\_optimal}\textsuperscript{$\star$}      & $1/1$ & n/a    & n/a    \\
-\emph{etavector}\textsuperscript{$\ddagger$}      & $1/1$ & $1/5$  & $0/5$ \\
-\texttt{c\_sharp\_ranking}                         & $1/1$ & $0/5$  & $0/5$ \\
-\texttt{equivalence\_break\_at} \texttt{\_finite\_precision} & $0/3$\textsuperscript{$\dagger$} & $0/5$ & $0/5$ \\
-\bottomrule
-\end{tabular}%
-}
-\caption{Illustrative four-problem subset of FormalAVS. Each cell is
-\emph{(closures)/(attempts)}. Aristotle is one session per problem.
-DSPv2 and Opus are pass@5 at $N{=}5$. The four rows expose four
-distinct solver regimes. Universal closure sits at the top.
-Majority closure is \texttt{etavector}, the $\sqrt{2}$ identity
-that Kimi and Mistral also close at $N{=}5$. Aristotle-monopoly is
-\texttt{c\_sharp\_ranking}. The solver-unreached frontier is
-\texttt{equivalence\_break}.
-\textsuperscript{$\star$}Companion-archive entry, not in the
-$48$-slate drafter sweep, included for the universal regime.
-\textsuperscript{$\dagger$}Aristotle returned a counterexample on the
-as-stated form (missing symmetry hypothesis). The corrected form
-remains open. \textsuperscript{$\ddagger$}Lean lemma name shortened
-from the full \emph{etavector\_eq\_sqrt\_two\_mul\_etahr}, see
-\citet{anonymous2026formalavs}. Full per-tier benchmark numbers in
-\citet{anonymous2026formalavs}.}
-\label{tab:illustrative-comparison}
-\end{table}
-
-The wider table on the full benchmark subset is in
-Appendix~\ref{sec:appendix-comparison}.
+The thirty-two cross-domain theorems in the library were closed
+with help from a swarm of contemporary drafters: Aristotle
+\citep{harmonic2025aristotle},
+DeepSeek-Prover-V2 \citep{deepseekprover2024v2}, Claude Sonnet
+4.6, and Claude Opus 4.6. Per-theorem drafter attribution is
+recorded in the library manifest at
+\texttt{tools/sim/theorem\_manifest.py}. No single drafter
+closes the full corpus on its own, and the union of their
+successful kernel-checked contributions is what populates the
+shipped library.
 
 \subsection{Limitations}
 \label{sec:discussion-limitations}
 
-Three concrete gaps. (i) Domain scope: \texttt{pythia} is
-statistics-domain only. It does not address general proof automation
-in Lean 4. (ii) Toolchain pin: the library ships pinned to Lean
-4.28 + Mathlib v4.28.0. Mathlib evolves quickly. Each major Mathlib
-release typically requires a porting pass. (iii) Aristotle
-dependency: the hardest closures route to a proprietary external
-prover. The \texttt{z3\_check} oracle is open-source. The Aristotle
-oracle is not. The library is usable without Aristotle for any goal
-that closes via the \texttt{pythia} dispatcher chain or
-\texttt{z3\_check}. A subset of structural Mathlib gaps requires
-either Aristotle or a hand proof.
+Three concrete gaps. (i) Domain scope. \texttt{pythia} is an
+applied-mathematics library. It does not address general proof
+automation across all of Lean 4. (ii) Toolchain pin. The library
+ships pinned to Lean 4.28 + Mathlib v4.28.0. Mathlib evolves
+quickly. Each major Mathlib release typically requires a
+porting pass. (iii) Drafter dependency for restocking. A small
+number of theorems in the corpus were initially closed with the
+help of the proprietary Aristotle prover. \texttt{pythia} does
+not depend on Aristotle at use time. The shipped library is
+self-contained Lean source. End users invoke \texttt{pythia!}
+without any external drafter call. New theorems may need a
+drafter assist during development if no \texttt{pythia!} rung
+closes them. Every shipped proof is kernel-checked and
+reproducible from the library source alone.
