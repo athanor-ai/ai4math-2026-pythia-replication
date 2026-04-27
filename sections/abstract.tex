@@ -2,43 +2,37 @@
 \begin{abstract}
 Working scientists rely on the Python scientific stack for
 applied mathematics. SciPy, NumPy, and pytest let a probabilist
-or a control theorist write down a domain object, manipulate it
-with domain-aware functions, and exercise the result with
-property-based tests and parameter sweeps. The formal-proof
+or a control theorist write down a domain object and exercise it
+under property-based tests and parameter sweeps. The formal-proof
 analogue does not yet exist for these scientists. Lean 4 with
 Mathlib delivers kernel-checked proofs and a strong general
 tactic suite, but the suite does not compose into a domain
-hammer for applied mathematics. The formal layer is also
-disconnected from the empirical sim-and-test workflow scientists
-already use.
+hammer for applied mathematics, and the formal layer is
+disconnected from the empirical sim-and-test workflow.
 
 We present \texttt{pythia}, a Lean 4 library that closes this
-gap on three sides. First, \texttt{pythia} ships a corpus of
-thirty-two cross-domain theorems across fifteen applied-math
-fields, covering probability and statistics, biology, chemistry,
-economics, control, optimal transport, quantum information,
-stochastic calculus, game theory, thermodynamics, numerical
-analysis, queueing, and operations research. Every public
-theorem is axiom-clean against the standard kernel set
-$\{\texttt{propext}, \texttt{Classical.choice}, \texttt{Quot.sound}\}$.
-Second, every theorem carries a matched Python sim runner that
-exercises the empirical specification under property-based
-testing, parameter sweeps, and mutation testing. The Lean
-statement and the Python empirical model share names and
-regime-of-validity declarations so they stay aligned. Third,
-\texttt{pythia} ships eleven registered tactics. The headline
-tactic \texttt{pythia!} walks a nine-rung deterministic ladder
-that composes Mathlib tactics, local SMT solvers (Z3, CVC5),
-and external ATP backends (Vampire, E).
+gap on three sides. First, \texttt{pythia} ships thirty-two
+cross-domain theorems across fifteen applied-math fields:
+probability and statistics, biology, chemistry, economics,
+control, optimal transport, quantum information, stochastic
+calculus, game theory, thermodynamics, numerical analysis,
+queueing, and operations research. Every public theorem is
+axiom-clean against the standard kernel set $\mathcal{A}_0 :=
+\{\texttt{propext},$ $\texttt{Classical.choice},$
+$\texttt{Quot.sound}\}$. Second, every theorem carries a matched
+Python sim runner that exercises the empirical specification
+under property-based testing, sweeps, and mutation testing,
+sharing names and regime-of-validity declarations with the Lean
+statement. Third, \texttt{pythia} ships eleven tactics. The
+headline \texttt{pythia!} walks a nine-rung deterministic ladder
+of Mathlib tactics, SMT solvers (Z3, CVC5), and ATP backends
+(Vampire, E).
 
-The corpus was assembled with help from a swarm of contemporary
-drafters: Aristotle \citep{harmonic2025aristotle},
-DeepSeek-Prover-V2 \citep{deepseekprover2024v2}, Claude Sonnet
-4.6, and Claude Opus 4.6. Drafters are not oracles. Each
-candidate proof is checked by the Lean kernel, audited against
-the closed-form axiom set, and filtered for vacuous closures
-before it enters the library. The result is a Lean library that
-a working scientist can use the way they use SciPy. The library
-is pinned to Lean 4.28 + Mathlib v4.28.0 and released
-open-source.
+The corpus was assembled with help from contemporary drafters:
+Aristotle \citep{harmonic2025aristotle}, DeepSeek-Prover-V2
+\citep{deepseekprover2024v2}, Claude Sonnet 4.6, Claude Opus
+4.6. Drafters are not oracles: every candidate is kernel-checked,
+axiom-audited against $\mathcal{A}_0$, and filtered for vacuous
+closures before integration. The library is pinned to Lean 4.28
++ Mathlib v4.28.0 and released open-source.
 \end{abstract}
