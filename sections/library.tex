@@ -3,11 +3,11 @@
 
 The shipped \texttt{pythia} library spans a tactic layer plus a
 proof-content layer of fifteen applied-math domains. The full
-manifest at the time of writing carries thirty-two cross-domain
-theorems with matched Python sim runners (property-based testing,
-parameter sweeps, mutation testing) plus four hundred and sixty
-total theorem and lemma declarations across the
-\texttt{Pythia/} source tree, fifty-five of which are tagged
+manifest carries thirty-two cross-domain theorems with matched
+Python sim runners. Sim runners exercise property-based testing,
+parameter sweeps, and mutation testing. The full source tree
+declares four hundred and sixty theorem and lemma items across
+the \texttt{Pythia/} namespace. Fifty-five of these are tagged
 \texttt{@[stat\_lemma]} and registered into the headline cascade.
 Every theorem listed here is axiom-clean against
 $\{\texttt{propext}, \texttt{Classical.choice}, \texttt{Quot.sound}\}$
@@ -77,75 +77,65 @@ theorem with property-based-test mutation coverage in the
 companion runner.
 
 \begin{itemize}[leftmargin=1.3em,itemsep=0.2em]
-\item \textbf{Probability and statistics:} the anytime-valid /
-  concentration / matrix sections above plus \texttt{Pythia.Risk.}
-  \texttt{CVaR}~\citep{rockafellaruryasev2000} and
-  \texttt{Pythia.Asymptotics.} \texttt{DeltaMethod} (scalar) /
-  \texttt{DeltaMethodMulti} (multivariate).
-\item \textbf{Information theory:} \texttt{Pythia.InfoTheory.}
-  \texttt{BretagnolleHuberBinary} (binary-alphabet bound),
-  \texttt{Pythia.InfoTheory.DataProcessing} (data-processing
-  inequality), \texttt{Pythia.InfoTheory.BinaryEntropy} (Shannon
-  binary entropy).
-\item \textbf{Stochastic calculus:}
-  \texttt{Pythia.Stochastic.ItoIsometryFiniteDim} (finite-dim Itô
-  isometry), \texttt{Pythia.BDG} (Burkholder-Davis-Gundy at
-  $p = 2$), \texttt{Pythia.MeasureTheory.}
-  \texttt{ConditionalJensen}, \texttt{Pythia.StochasticApproximation.}
-  \texttt{RobbinsSiegmund} / \texttt{RobbinsMonro} /
-  \texttt{Dvoretzky}, \texttt{Pythia.TimeSeries.WoldDecomposition}
-  \citep{wold1938}, \texttt{Pythia.TimeSeries.NeweyWest}.
-\item \textbf{Quantum information:}
-  \texttt{Pythia.Quantum.VonNeumannEntropyNonnegTwoState}
-  (qubit von Neumann entropy non-negativity).
-\item \textbf{Optimal transport:}
-  \texttt{Pythia.OptimalTransport.WassersteinDistanceNonneg}
-  (discrete L1 Wasserstein non-negativity).
-\item \textbf{Game theory:}
-  \texttt{Pythia.GameTheory.MinimaxTwoStrategyBound}
-  (von Neumann two-strategy minimax inequality).
-\item \textbf{Biology:} \texttt{Pythia.Bio.Population}
-  (Hardy-Weinberg, Lotka-Volterra equilibria, SIR conservation),
-  \texttt{Pythia.Bio.MichaelisMentenSaturation} (enzyme
-  saturation), \texttt{Pythia.Bio.MassAction} (CRN ODE
-  conservation), \texttt{Pythia.Bio.Phylogenetics}.
-\item \textbf{Chemistry:} \texttt{Pythia.Chemistry.Arrhenius}
-  (rate-law positivity), \texttt{Pythia.Chemistry.}
-  \texttt{HendersonHasselbalch} (pH monotonicity),
-  \texttt{Pythia.Chemistry.MassActionConservation}.
-\item \textbf{Economics:} \texttt{Pythia.Economics.CobbDouglas}
-  (constant returns to scale), \texttt{Pythia.Economics.CRRA}
-  (utility concavity), \texttt{Pythia.Economics.CAPM}
-  (linear pricing), \texttt{Pythia.Economics.RiskNeutralCall}
-  (non-negativity), \texttt{Pythia.Economics.Walras}
-  (excess-demand identity).
-\item \textbf{Engineering:}
-  \texttt{Pythia.Engineering.RCTimeConstant},
-  \texttt{Pythia.Engineering.SignalEnergy},
-  \texttt{Pythia.Engineering.PowerDissipation}.
-\item \textbf{Mechanical:}
-  \texttt{Pythia.Mechanical.HookeSpring}
-  (spring-potential non-negativity).
-\item \textbf{Control theory:}
-  \texttt{Pythia.Control.Lyapunov} (scalar),
-  \texttt{Pythia.Control.LyapunovDiscrete} (discrete-time),
-  \texttt{Pythia.Control.LyapunovODE}.
-\item \textbf{Operations research / queueing:}
-  \texttt{Pythia.Queueing.ErlangB},
-  \texttt{Pythia.Queueing.LittlesLaw},
-  \texttt{Pythia.OR.LittlesLaw}.
-\item \textbf{Numerical analysis:}
-  \texttt{Pythia.Numerical.NewtonQuadraticIterPos},
-  \texttt{Pythia.Numerical.PicardLindelof},
-  \texttt{Pythia.Numerical.Lyapunov},
-  \texttt{Pythia.Numerical.KKT},
-  \texttt{Pythia.Numerical.Kahan}.
-\item \textbf{Thermodynamics:}
-  \texttt{Pythia.Thermodynamics.CarnotEfficiencyUpperBound}.
-\item \textbf{Mathlib retags + actuarial:}
-  \texttt{Pythia.MathlibTags} (AM-GM, Markov, Cauchy-Schwarz with
-  empirical companions), \texttt{Pythia.Actuarial.\{Pareto,
-  Weibull, LogNormal\}}.
+\item \textbf{Probability and statistics:} the anytime-valid,
+  concentration, and matrix sections above plus the \texttt{Risk}
+  subpackage with \texttt{CVaR}~\citep{rockafellaruryasev2000} and
+  the \texttt{Asymptotics} subpackage with scalar
+  \texttt{DeltaMethod} and \texttt{DeltaMethodMulti}.
+\item \textbf{Information theory:} the \texttt{InfoTheory}
+  subpackage carries \texttt{BretagnolleHuberBinary}
+  (binary-alphabet bound), \texttt{DataProcessing} (data-processing
+  inequality), and \texttt{BinaryEntropy} (Shannon binary entropy).
+\item \textbf{Stochastic calculus:} the \texttt{Stochastic}
+  subpackage carries the finite-dimensional Itô isometry
+  (\texttt{ItoIsometryFiniteDim}). \texttt{Pythia.BDG} carries the
+  Burkholder, Davis, and Gundy inequality at $p = 2$. The
+  \texttt{StochasticApproximation} subpackage groups
+  \texttt{RobbinsSiegmund}, \texttt{RobbinsMonro}, and
+  \texttt{Dvoretzky}. The \texttt{MeasureTheory} subpackage carries
+  conditional Jensen via \texttt{ConditionalJensen}. The \texttt{TimeSeries} subpackage
+  carries \texttt{WoldDecomposition} \citep{wold1938} and
+  \texttt{NeweyWest}.
+\item \textbf{Quantum information:} the \texttt{Quantum}
+  subpackage carries the qubit von Neumann entropy
+  non-negativity result.
+\item \textbf{Optimal transport:} the \texttt{OptimalTransport}
+  subpackage carries discrete $L_1$ Wasserstein non-negativity.
+\item \textbf{Game theory:} the \texttt{GameTheory} subpackage
+  carries the von Neumann two-strategy minimax inequality.
+\item \textbf{Biology:} the \texttt{Bio} subpackage groups
+  Hardy-Weinberg, Lotka-Volterra equilibria, and SIR conservation
+  in \texttt{Population}, plus Michaelis-Menten enzyme saturation,
+  chemical reaction network ODE conservation in
+  \texttt{MassAction}, and \texttt{Phylogenetics}.
+\item \textbf{Chemistry:} the \texttt{Chemistry} subpackage
+  carries Arrhenius rate-law positivity, Henderson-Hasselbalch
+  pH monotonicity, and mass-action conservation.
+\item \textbf{Economics:} the \texttt{Economics} subpackage
+  carries Cobb-Douglas constant returns to scale, CRRA utility
+  concavity, CAPM linear pricing, risk-neutral call
+  non-negativity, and Walras excess-demand identity.
+\item \textbf{Engineering:} the \texttt{Engineering} subpackage
+  carries the RC time constant, signal energy, and power
+  dissipation results.
+\item \textbf{Mechanical:} the \texttt{Mechanical} subpackage
+  carries Hooke spring-potential non-negativity.
+\item \textbf{Control theory:} scalar, discrete-time, and ODE
+  Lyapunov results live in the \texttt{Control} subpackage.
+\item \textbf{Operations research and queueing:} the
+  \texttt{Queueing} subpackage carries Erlang-B and Little's law.
+  The \texttt{OR} subpackage carries an alternative Little's-law
+  formulation.
+\item \textbf{Numerical analysis:} the \texttt{Numerical}
+  subpackage carries Newton iteration positivity, Picard-Lindelöf
+  existence, Lyapunov certificates, KKT conditions, and Kahan
+  summation.
+\item \textbf{Thermodynamics:} the \texttt{Thermodynamics}
+  subpackage carries the Carnot efficiency upper bound.
+\item \textbf{Mathlib retags + actuarial:} \texttt{MathlibTags}
+  retags AM-GM, Markov, and Cauchy-Schwarz with matched empirical
+  companions. The \texttt{Actuarial} subpackage groups Pareto,
+  Weibull, and LogNormal heavy-tail distributions.
 \end{itemize}
 
 \subsection{Five highlights}

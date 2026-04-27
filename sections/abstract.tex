@@ -4,43 +4,45 @@ Lean 4 with Mathlib ships strong general automation (\texttt{aesop},
 \texttt{simp}, \texttt{linarith}, \texttt{polyrith}, \texttt{nlinarith},
 \texttt{positivity}, \texttt{measurability}, \texttt{bound},
 \texttt{gcongr}). It does not ship a hammer for applied
-mathematics: the moment a goal mentions a martingale, a stopping
-time, a production function, an ODE Lyapunov candidate, a
-Wasserstein distance, or a quantum density operator, the generic
-tactics have nothing to apply.
+mathematics. The moment a goal mentions a martingale, a stopping
+time, a production function, an ordinary differential equation
+(ODE) Lyapunov candidate, a Wasserstein distance, or a quantum
+density operator, the generic tactics have nothing to apply.
 We present \texttt{pythia}, a Lean 4 tactic library for
 applied-mathematics proof automation. The headline tactic
-\texttt{pythia!} orchestrates a nine-rung deterministic ladder
-(\texttt{stat\_simp}, \texttt{linarith} / \texttt{nlinarith} /
-\texttt{polyrith}, \texttt{positivity}, \texttt{aesop} on the
-registered \texttt{Pythia} ruleset, the \texttt{@[stat\_lemma]}
-cascade, \texttt{z3\_check}, \texttt{cvc5\_check},
-\texttt{vampire\_check} / \texttt{e\_check}, and
-\texttt{disprove}); each rung tries fail-fast with a bounded
-budget; the verbose variant \texttt{pythia?} reports the closing
-rung and per-rung wall-clock timing for diagnostic use. The
-library ships ten registered tactics, attribute-driven registries
-(\texttt{@[stat\_lemma]}, \texttt{@[stats\_ineq]},
-\texttt{@[prob\_simp]}, \texttt{@[stat\_simp]},
-\texttt{@[anytime\_valid\_lemma]}, plus the per-domain calculator
-typeclass), and a fifteen-domain proof library with thirty-two
-cross-domain theorems carrying matched Python sim runners
-(property-based testing, deterministic sweeps, mutation testing).
-Domains span probability and statistics, biology, chemistry,
-economics, control theory, optimal transport, quantum information,
-stochastic calculus, game theory, thermodynamics, numerical
-analysis, queueing, and operations research. Every public theorem
-is axiom-clean against the standard Lean kernel set
-($\texttt{propext}$, $\texttt{Classical.choice}$,
+\texttt{pythia!} orchestrates a nine-rung deterministic ladder.
+The rungs are \texttt{stat\_simp}, the
+\texttt{linarith}/\texttt{nlinarith}/\texttt{polyrith} chain,
+\texttt{positivity}, \texttt{aesop} on the registered
+\texttt{Pythia} ruleset, the \texttt{@[stat\_lemma]} cascade,
+\texttt{z3\_check}, \texttt{cvc5\_check}, \texttt{vampire\_check}
+or \texttt{e\_check}, and \texttt{disprove}. Each rung tries
+fail-fast with a bounded budget. The verbose variant
+\texttt{pythia?} reports the closing rung and per-rung wall-clock
+timing for diagnostic use. The library ships ten registered
+tactics, attribute-driven registries (\texttt{@[stat\_lemma]},
+\texttt{@[stats\_ineq]}, \texttt{@[prob\_simp]},
+\texttt{@[stat\_simp]}, \texttt{@[anytime\_valid\_lemma]}, plus
+the per-domain calculator typeclass), and a fifteen-domain proof
+library with thirty-two cross-domain theorems carrying matched
+Python sim runners (property-based testing, deterministic sweeps,
+mutation testing). Domains span probability and statistics,
+biology, chemistry, economics, control theory, optimal transport,
+quantum information, stochastic calculus, game theory,
+thermodynamics, numerical analysis, queueing, and operations
+research. Every public theorem is axiom-clean against the standard
+Lean kernel set ($\texttt{propext}$, $\texttt{Classical.choice}$,
 $\texttt{Quot.sound}$). The cross-prover ladder is offline-first
-and LLM-free: \texttt{z3\_check} / \texttt{cvc5\_check} /
-\texttt{vampire\_check} / \texttt{e\_check} dispatch to local SMT
-and ATP binaries with kernel-checked reconstruction in the
-CoqHammer style of \citet{czajkakaliszyk2018coqhammer};
-LLM-augmented closure lives in a separate companion SDK that the
+and free of large language models (LLMs): \texttt{z3\_check},
+\texttt{cvc5\_check}, \texttt{vampire\_check}, and \texttt{e\_check}
+dispatch to local Satisfiability Modulo Theories (SMT) and
+Automated Theorem Prover (ATP) binaries with kernel-checked
+reconstruction in the CoqHammer style of
+\citet{czajkakaliszyk2018coqhammer}. LLM-augmented closure lives
+in a separate companion software development kit (SDK) that the
 library does not depend on. Hard structural Mathlib gaps are
 optionally routed to the Aristotle automated theorem prover
-\citep{harmonic2025aristotle} for development-time restocking, with
-audit gates against vacuous-truth closures. The library is pinned
-to Lean 4.28 + Mathlib v4.28.0 and released open-source.
+\citep{harmonic2025aristotle} for development-time restocking,
+with audit gates against vacuous-truth closures. The library is
+pinned to Lean 4.28 + Mathlib v4.28.0 and released open-source.
 \end{abstract}

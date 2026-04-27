@@ -5,9 +5,9 @@ Lean 4 tactic library for statistical proof automation.
 
 - Workshop CFP: <https://ai4math2026.github.io/#cfp>
 - Deadline: 2026-05-25
-- Format: ICML 2025 styles vendored under `styles/` (AI4MATH 2026 has
-  no independent template; ICML 2026 styles not yet released as of
-  build time, so we use 2025 as the closest live template).
+- Format: ICML 2026 styles vendored under `styles/` (AI4MATH 2026 has
+  no independent template; we use the official ICML 2026 styles
+  released 2025-10-29).
 
 ## Build
 
@@ -47,7 +47,7 @@ PYTHONPATH=$HOME/athanor-builder/tools python3 -m paper_lint .
 - `sections/`: section-by-section content (abstract, intro,
   tactic-surface, library, aristotle, discussion, appendix).
 - `references.bib`: BibTeX.
-- `styles/`: vendored ICML 2025 sty/cls/bst.
+- `styles/`: vendored ICML 2026 sty/cls/bst.
 - `paper_lint.toml`: lint config, `venue = "ai4math-2026"` (preset
   not yet shipped in athanor-builder; documented gap inside the
   config).

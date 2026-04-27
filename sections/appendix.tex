@@ -57,8 +57,9 @@ flagged as scaffold.
 
 \subsection{Other modules}
 \begin{itemize}[leftmargin=1.3em,itemsep=0.2em]
-\item \texttt{Pythia.Control.LyapunovDiscrete}: discrete-time
-  Lyapunov stability for linear systems.
+\item The \texttt{Pythia.Control} subpackage carries
+  \texttt{LyapunovDiscrete}, the discrete-time Lyapunov stability
+  result for linear systems.
 \item \texttt{Pythia.Queueing.ErlangB}: Erlang-B blocking formula.
 \item \texttt{Pythia.Queueing.LittlesLaw}: Little's law steady-state
   identity.
@@ -70,9 +71,9 @@ flagged as scaffold.
   multivariate delta method.
 \item \texttt{Pythia.InfoTheory.} \texttt{BretagnolleHuberBinary}: binary-case
   total-variation bound via the Bhattacharyya bridge.
-\item \texttt{Pythia.MeasureTheory.} \texttt{OptionalStoppingUnbounded},
-  \texttt{Pythia.MeasureTheory.PathMeasureRN}: structural support
-  for the Ville chain.
+\item The \texttt{Pythia.MeasureTheory} subpackage carries
+  \texttt{OptionalStoppingUnbounded} and \texttt{PathMeasureRN}.
+  Both are structural support for the Ville chain.
 \end{itemize}
 
 \section{Worked examples}
@@ -211,9 +212,9 @@ solver-hit-Mathlib-gap (every solver $0/4$ for the same library-gap
 reason). T5 is the all-solver capability-ceiling target. The 6/6 vs
 1/6 vs 0/6 column at T3 (cross-function inequality wall) is the
 benchmark's cleanest solver-specific signal. The single DSPv2 T3
-closure is \texttt{etavector\_eq\_sqrt\_two\_mul\_etahr} (the
-$\sqrt{2}$ identity, also closed by Kimi K2.5 and Mistral Large 3 in
-the wider drafter sweep). Source: dataset paper
+closure is the $\eta\textsc{vector}{=}\sqrt{2}\,\eta\textsc{hr}$
+identity (the \emph{etavector} target). Kimi K2.5 and Mistral
+Large 3 also close this one in the wider drafter sweep. Source: dataset paper
 \citep{anonymous2026formalavs}, Tables 1-2 reproduced verbatim.}
 \label{tab:wide-comparison}
 \end{table}
@@ -287,14 +288,15 @@ URL is redacted for double-blind review.
 
 \subsection{Lean 4 tactic infrastructure}
 Mathlib ships a tactic suite the \texttt{pythia} dispatcher composes
-with. \texttt{linarith} produces Farkas certificates,
+with. \texttt{linarith} produces Farkas certificates and
 \texttt{polyrith} routes polynomial-ideal goals via Sage with
-kernel-checked reconstruction, \texttt{nlinarith} extends
-\texttt{linarith} to a small non-linear fragment, \texttt{positivity}
-discharges sign goals, \texttt{measurability} closes
-$\sigma$-algebra-membership obligations, \texttt{gcongr} discharges
-generalised-congruence monotonicity, and \texttt{bound} dispatches
-monotone-composition goals via an attribute-driven rule database.
+kernel-checked reconstruction. \texttt{nlinarith} extends
+\texttt{linarith} to a small non-linear fragment. Sign goals route
+through \texttt{positivity} and $\sigma$-algebra-membership goals
+through \texttt{measurability}. Generalised-congruence monotonicity
+is discharged by \texttt{gcongr}. Monotone-composition goals route
+through \texttt{bound}, which uses an attribute-driven rule
+database.
 The closest Mathlib relative to \texttt{pythia} is \texttt{bound}:
 the \texttt{@[stats\_ineq]} attribute literally re-tags lemmas as
 \texttt{@[bound]}, so the underlying \texttt{bound} dispatch picks
@@ -321,10 +323,10 @@ to Vampire, E, Z3, CVC4 with kernel-checked reconstruction. Premise
 selection in CoqHammer is k-NN over a featurised representation of
 the Coq context. The reconstruction step is a small certifying tactic
 (\texttt{sauto}) that replays the ATP's witness inside the Coq
-kernel. \texttt{z3\_check}'s reconstruction-via-\texttt{linarith}
-mirrors this template at small scale: external prover supplies the
-verdict, in-kernel tactic supplies the proof term, kernel is the
-final arbiter. We do not claim a full Lean-side reimplementation of
+kernel. \texttt{z3\_check}'s reconstruction via \texttt{linarith}
+mirrors this template at small scale. The external prover supplies
+the verdict and the in-kernel tactic supplies the proof term. The
+kernel is the final arbiter. We do not claim a full Lean-side reimplementation of
 CoqHammer's premise-selection layer.
 
 \subsection{Statistical formalisation libraries}

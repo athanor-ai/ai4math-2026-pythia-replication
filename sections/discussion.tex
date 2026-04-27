@@ -35,10 +35,9 @@ Mathlib supplies \texttt{linarith}, \texttt{polyrith},
 \texttt{nlinarith}, \texttt{positivity}, \texttt{measurability},
 \texttt{bound}, \texttt{gcongr}. None of these is a statistics-domain
 hammer. \texttt{stats\_ineq} is the closest \texttt{pythia} relative
-of the Mathlib \texttt{bound} family: the
-\texttt{@[stats\_ineq]} attribute re-tags lemmas as
-\texttt{@[bound]}, so \texttt{bound}'s mature dispatch picks them up
-automatically. \texttt{pythia} composes with all of the listed
+of the Mathlib \texttt{bound} family. The \texttt{@[stats\_ineq]}
+attribute re-tags lemmas as \texttt{@[bound]}, so the mature
+\texttt{bound} dispatch picks them up automatically. \texttt{pythia} composes with all of the listed
 Mathlib tactics. The fall-through chain at stage 2 of the dispatcher
 combines \texttt{simp}, \texttt{omega}, \texttt{linarith}, and
 \texttt{positivity}. The chain is the explicit composition.
@@ -66,7 +65,7 @@ kernel-checked.
 \textbf{Problem} & \textbf{Aristotle} & \textbf{DSPv2} & \textbf{Opus 4.6} \\
 \midrule
 \texttt{betting\_is\_kelly\_optimal}\textsuperscript{$\star$}      & $1/1$ & n/a    & n/a    \\
-\texttt{etavector\_eq\_sqrt\_two\_mul\_etahr}      & $1/1$ & $1/5$  & $0/5$ \\
+\emph{etavector}\textsuperscript{$\ddagger$}      & $1/1$ & $1/5$  & $0/5$ \\
 \texttt{c\_sharp\_ranking}                         & $1/1$ & $0/5$  & $0/5$ \\
 \texttt{equivalence\_break\_at} \texttt{\_finite\_precision} & $0/3$\textsuperscript{$\dagger$} & $0/5$ & $0/5$ \\
 \bottomrule
@@ -75,15 +74,18 @@ kernel-checked.
 \caption{Illustrative four-problem subset of FormalAVS. Each cell is
 \emph{(closures)/(attempts)}. Aristotle is one session per problem.
 DSPv2 and Opus are pass@5 at $N{=}5$. The four rows expose four
-distinct solver regimes: universal closure (top), majority closure
-(\texttt{etavector}, the $\sqrt{2}$ identity Kimi and Mistral also
-close at $N{=}5$), Aristotle-monopoly (\texttt{c\_sharp\_ranking}),
-and solver-unreached frontier (\texttt{equivalence\_break}).
+distinct solver regimes. Universal closure sits at the top.
+Majority closure is \texttt{etavector}, the $\sqrt{2}$ identity
+that Kimi and Mistral also close at $N{=}5$. Aristotle-monopoly is
+\texttt{c\_sharp\_ranking}. The solver-unreached frontier is
+\texttt{equivalence\_break}.
 \textsuperscript{$\star$}Companion-archive entry, not in the
 $48$-slate drafter sweep, included for the universal regime.
 \textsuperscript{$\dagger$}Aristotle returned a counterexample on the
 as-stated form (missing symmetry hypothesis). The corrected form
-remains open. Full per-tier benchmark numbers in
+remains open. \textsuperscript{$\ddagger$}Lean lemma name shortened
+from the full \emph{etavector\_eq\_sqrt\_two\_mul\_etahr}, see
+\citet{anonymous2026formalavs}. Full per-tier benchmark numbers in
 \citet{anonymous2026formalavs}.}
 \label{tab:illustrative-comparison}
 \end{table}
