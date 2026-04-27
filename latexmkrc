@@ -1,6 +1,6 @@
 # latexmk configuration for Overleaf and any caller that respects
 # latexmkrc. Prepends `./styles/` to the TEXINPUTS / BSTINPUTS search
-# path so `\usepackage{icml2025}` and the matching `.bst` resolve
+# path so `\usepackage{icml2026}` and the matching `.bst` resolve
 # without requiring the caller to set environment variables.
 #
 # Local builds use `build.sh`, which sets TEXINPUTS / BSTINPUTS

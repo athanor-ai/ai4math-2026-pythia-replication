@@ -5,18 +5,16 @@
 % not publish a venue-specific style file. AI4MATH workshops in prior
 % cycles inherited the host conference's template (NeurIPS 2024, ICML
 % 2025). Aidan's directive (2026-04-26) selects ICML formatting since
-% AI4MATH 2026 sits in the ML-conference orbit. We vendor ICML 2025 as
-% the closest live template; swap to icml2026 when the 2026 styles
-% publish (https://media.icml.cc/Conferences/ICML2026/Styles/icml2026.zip
-% currently 404s).
+% AI4MATH 2026 sits in the ML-conference orbit. We vendor the official
+% ICML 2026 styles (icml2026.sty / icml2026.bst, dated 2025-10-29).
 %
 % Compile: bash build.sh  (runs pdflatex x3 + bibtex).
 
 \documentclass{article}
 
 % Style files vendored under styles/. TEXINPUTS in build.sh adds
-% styles/ to the search path so \usepackage{icml2025} resolves.
-\usepackage{icml2025}
+% styles/ to the search path so \usepackage{icml2026} resolves.
+\usepackage{icml2026}
 
 \usepackage{microtype}
 \usepackage{graphicx}
@@ -124,7 +122,7 @@
 \input{sections/discussion}
 
 {\sloppy
-\bibliographystyle{icml2025}
+\bibliographystyle{icml2026}
 \bibliography{references}
 }
 

@@ -1,14 +1,14 @@
 \section{Introduction}
 \label{sec:intro}
 
-Lean 4 with Mathlib ships strong general-purpose proof automation:
-\texttt{aesop} for forward search, \texttt{simp} for rewriting,
-\texttt{linarith} and \texttt{polyrith} for linear and polynomial
-arithmetic, \texttt{nlinarith} for non-linear arithmetic,
-\texttt{positivity} for sign goals, \texttt{measurability} for the
-$\sigma$-algebra fragment, \texttt{bound} for monotone composition,
-\texttt{gcongr} for generalised congruence
-\citep{moura2021lean, mathlib2020community, mathlib2025}.
+Lean 4 with Mathlib ships strong general-purpose proof automation
+\citep{moura2021lean, mathlib2020community, mathlib2025}. Forward
+search lives in \texttt{aesop} and rewriting in \texttt{simp}.
+Arithmetic is split across \texttt{linarith}, \texttt{polyrith},
+and \texttt{nlinarith}. Sign goals route through \texttt{positivity}
+and the $\sigma$-algebra fragment through \texttt{measurability}.
+Monotone composition uses \texttt{bound} and generalised congruence
+uses \texttt{gcongr}.
 Applied-mathematics proofs route through these general tactics,
 typically by hand decomposition into a chain of \texttt{simp} sets,
 \texttt{linarith} hypotheses, and Mathlib lemma selection. None of
