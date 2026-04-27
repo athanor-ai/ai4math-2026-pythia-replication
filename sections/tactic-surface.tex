@@ -14,31 +14,78 @@ exposed for direct invocation when the user knows the goal shape.
 \subsection{Ten tactics}
 \label{sec:tactic-surface-ten}
 
-\begin{table}[h]
+\begin{table*}[t]
 \centering
 \small
-\begin{tabular}{lp{5.5cm}}
+\begin{tabular}{p{0.20\textwidth}p{0.74\textwidth}}
 \toprule
 \textbf{Tactic} & \textbf{Role} \\
 \midrule
-\texttt{pythia!} & Headline orchestrator. Walks a nine-rung deterministic ladder (\texttt{stat\_simp}; \texttt{linarith} / \texttt{nlinarith} / \texttt{polyrith}; \texttt{positivity}; \texttt{aesop[Pythia]}; \texttt{pythia} cascade; \texttt{z3\_check}; \texttt{cvc5\_check}; \texttt{vampire\_check} / \texttt{e\_check}; \texttt{disprove}). First-to-close wins. Bounded per-rung budget. \\
-\texttt{pythia?} & Verbose \texttt{pythia!}: reports the closing rung and per-rung wall-clock timing. Diagnostic use. \\
-\texttt{pythia} & Shape-dispatching cascade. Routes to \texttt{anytime\_valid} / \texttt{stats\_ineq} / \texttt{prob\_simp} / oracle by goal shape, then falls through to the \texttt{@[stat\_lemma]} aesop ruleset. \\
-\texttt{stats\_ineq} & Discharges concentration and tail-bound inequalities. Dispatches via Mathlib's \texttt{bound}, then \texttt{positivity}, \texttt{gcongr}, \texttt{linarith}, \texttt{nlinarith}. \\
-\texttt{prob\_simp} & Probability normalization rewrites. Runs \texttt{simp} against the \texttt{@[prob\_simp]} set with \texttt{push\_cast}/\texttt{norm\_cast} fallback. Aliased as \texttt{pdf\_simp}. \\
-\texttt{anytime\_valid} & Closes Ville-type maximal inequalities for confidence sequences. Three variants: countable-time, finite-horizon, and explicit-witness. \\
-\texttt{z3\_check} & Linear-real-arithmetic Z3 oracle with \texttt{linarith} reconstruction. \\
-\texttt{cvc5\_check} & QF\_BV / QF\_LRA via CVC5 with \texttt{bv\_decide} / \texttt{linarith} reconstruction. \\
-\texttt{vampire\_check} / \texttt{e\_check} & First-order-logic via Vampire / E with \texttt{aesop} reconstruction. \\
-\texttt{disprove} & Counterexample finder. Asks Z3 for a model of the goal's negation; on \texttt{sat}, fails the proof attempt with a concrete witness. Catches vacuous-truth goal statements. \\
+\texttt{pythia!}
+  & Headline orchestrator. Nine-rung deterministic ladder.
+    First-to-close wins, bounded per-rung budget. Ladder
+    composition: see Section~\ref{sec:tactic-surface-ten} below. \\
+\texttt{pythia?}
+  & Verbose \texttt{pythia!}. Reports the closing rung and per-rung
+    wall-clock timing. Diagnostic use. \\
+\texttt{pythia}
+  & Shape-dispatching cascade. Routes to
+    \texttt{anytime\_valid} / \texttt{stats\_ineq} /
+    \texttt{prob\_simp} / oracle by goal shape, then falls through
+    to the \texttt{@[stat\_lemma]} aesop ruleset. \\
+\texttt{stats\_ineq}
+  & Concentration and tail-bound inequalities. Dispatches via
+    Mathlib's \texttt{bound}, then \texttt{positivity},
+    \texttt{gcongr}, \texttt{linarith}, \texttt{nlinarith}. \\
+\texttt{prob\_simp}
+  & Probability normalisation rewrites. Runs \texttt{simp} against
+    the \texttt{@[prob\_simp]} set with
+    \texttt{push\_cast} / \texttt{norm\_cast} fallback. Aliased as
+    \texttt{pdf\_simp}. \\
+\texttt{anytime\_valid}
+  & Ville-type maximal inequalities for confidence sequences.
+    Three variants: countable-time, finite-horizon,
+    explicit-witness. \\
+\texttt{z3\_check}
+  & Linear-real-arithmetic Z3 oracle with \texttt{linarith}
+    reconstruction. \\
+\texttt{cvc5\_check}
+  & QF\_BV / QF\_LRA via CVC5, with \texttt{bv\_decide} /
+    \texttt{linarith} reconstruction. \\
+\texttt{vampire\_check} / \texttt{e\_check}
+  & First-order-logic via Vampire / E, with \texttt{aesop}
+    reconstruction. \\
+\texttt{disprove}
+  & Counterexample finder. Asks Z3 for a model of the goal's
+    negation. On \texttt{sat}, fails loud with a concrete witness.
+    Catches vacuous-truth goal statements. \\
 \bottomrule
 \end{tabular}
 \caption{The ten \texttt{pythia} tactics. \texttt{pythia!} is the
-default entry point for new users. The other nine tactics are
-exposed for direct invocation when the user knows the goal shape
-or wants a single rung of the ladder.}
+default entry point. The other nine are exposed for direct
+invocation when the user knows the goal shape or wants a single
+rung of the ladder.}
 \label{tab:tactic-surface}
-\end{table}
+\end{table*}
+
+\paragraph{The nine-rung ladder of \texttt{pythia!}.}
+The headline tactic walks the rungs in order and returns the first
+closing proof.
+\begin{enumerate}[leftmargin=1.5em,itemsep=0.1em]
+\item \texttt{stat\_simp} (curated probability and ENNReal normal
+  forms).
+\item \texttt{linarith} / \texttt{nlinarith} / \texttt{polyrith}
+  (arithmetic).
+\item \texttt{positivity}.
+\item \texttt{aesop} on the registered \texttt{Pythia} ruleset.
+\item The \texttt{@[stat\_lemma]} shape-dispatch cascade.
+\item \texttt{z3\_check} (QF\_LRA via Z3).
+\item \texttt{cvc5\_check} (QF\_BV / QF\_LRA via CVC5).
+\item \texttt{vampire\_check} / \texttt{e\_check} (first-order logic
+  via Vampire / E).
+\item \texttt{disprove} (counterexample finder via Z3 model
+  extraction).
+\end{enumerate}
 
 \paragraph{\texttt{pythia} (top-level dispatcher).}
 The default entry point. Runs aesop with the \texttt{Pythia} aesop

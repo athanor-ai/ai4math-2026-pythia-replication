@@ -35,8 +35,9 @@
 \newunicodechar{∞}{\ensuremath{\infty}}
 \newunicodechar{∈}{\ensuremath{\in}}
 \newunicodechar{↦}{\ensuremath{\mapsto}}
-\newunicodechar{→}{\ensuremath{\to}}
-\newunicodechar{←}{\ensuremath{\leftarrow}}
+% newunicodechar's built-in defaults already map →, ←, ·, ⟨, ⟩ to the
+% LaTeX equivalents, so we don't redefine them — that would produce
+% "Redefining Unicode character" warnings on every build pass.
 \newunicodechar{α}{\ensuremath{\alpha}}
 \newunicodechar{β}{\ensuremath{\beta}}
 \newunicodechar{γ}{\ensuremath{\gamma}}
@@ -45,12 +46,11 @@
 \newunicodechar{σ}{\ensuremath{\sigma}}
 \newunicodechar{τ}{\ensuremath{\tau}}
 \newunicodechar{λ}{\ensuremath{\lambda}}
-\newunicodechar{·}{\ensuremath{\cdot}}
-\newunicodechar{⟨}{\ensuremath{\langle}}
-\newunicodechar{⟩}{\ensuremath{\rangle}}
 
 \usepackage{hyperref}
-\newcommand{\theHalgorithm}{\arabic{algorithm}}
+% \theHalgorithm is auto-defined by hyperref+algorithm in some
+% distributions and not others. \providecommand is the portable form.
+\providecommand{\theHalgorithm}{\arabic{algorithm}}
 \usepackage[capitalize,noabbrev]{cleveref}
 \usepackage{listings}
 \usepackage{xcolor}
