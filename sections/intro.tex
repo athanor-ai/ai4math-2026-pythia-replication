@@ -12,61 +12,66 @@ $\sigma$-algebra fragment, \texttt{bound} for monotone composition,
 Applied-mathematics proofs route through these general tactics,
 typically by hand decomposition into a chain of \texttt{simp} sets,
 \texttt{linarith} hypotheses, and Mathlib lemma selection. None of
-the general tactics know about each other; the user is the
+the general tactics know about each other. The user is the
 orchestrator. There is no domain hammer for applied mathematics.
 
 CoqHammer \citep{czajkakaliszyk2018coqhammer} dispatches Coq goals
-to external ATPs (Vampire, E, CVC4) with kernel-checked
-reconstruction. Sledgehammer
+to external automated theorem provers (ATPs) such as Vampire, E,
+and CVC4, with kernel-checked reconstruction. Sledgehammer
 \citep{paulsonblanchette2010threeyears, blanchettesledgehammer2011}
-plays the same role in Isabelle/HOL. Lean 4 has no comparable
+plays the same role in Isabelle/Higher Order Logic (HOL). Lean 4 has no comparable
 hammer. This paper does not attempt the fully-general case across
 all of Lean. We address the applied-mathematics surface: a
 registered library of concentration, anytime-valid, optimal
 transport, control-theoretic, and information-theoretic lemmas
-plus a fan-out across local SMT and ATP solvers, packaged as a
-single deterministic tactic call.
+plus a fan-out across local Satisfiability Modulo Theories (SMT)
+and ATP solvers, packaged as a single deterministic tactic call.
 
 \paragraph{Contribution.}
 We present \texttt{pythia}, a Lean 4 tactic library for
 applied-mathematics proof automation. The headline tactic
 \texttt{pythia!} orchestrates a nine-rung deterministic ladder
-under one call: \texttt{stat\_simp} (curated probability and
-ENNReal normal forms), \texttt{linarith} / \texttt{nlinarith} /
-\texttt{polyrith}, \texttt{positivity}, \texttt{aesop} on the
-registered \texttt{Pythia} ruleset, the \texttt{@[stat\_lemma]}
-shape-dispatch cascade, \texttt{z3\_check} (QF\_LRA via Z3),
-\texttt{cvc5\_check} (QF\_BV / QF\_LRA via CVC5),
-\texttt{vampire\_check} / \texttt{e\_check} (FOL via Vampire / E),
-and \texttt{disprove} (counterexample finder via Z3 model
-extraction). Each rung tries fail-fast with a per-rung budget;
-first-to-close wins. The verbose variant \texttt{pythia?} reports
-the closing rung and per-rung wall-clock timing for diagnostic
-use. \texttt{pythia} ships ten registered tactics in total, six
-attribute-driven registries (\texttt{@[stat\_lemma]},
+under one call. The first five rungs are pure-Lean tactics. They are
+\texttt{stat\_simp} (curated probability and ENNReal normal
+forms), the \texttt{linarith}/\texttt{nlinarith}/\texttt{polyrith}
+chain, \texttt{positivity}, \texttt{aesop} on the registered
+\texttt{Pythia} ruleset, and the \texttt{@[stat\_lemma]}
+shape-dispatch cascade. The next three rungs are external solvers
+with kernel-checked reconstruction. They are \texttt{z3\_check}
+(linear real arithmetic via Z3), \texttt{cvc5\_check} (bit-vector
+and linear real arithmetic via CVC5), and \texttt{vampire\_check}
+or \texttt{e\_check} (first-order logic, FOL, via Vampire or E).
+The final rung is \texttt{disprove}, a counterexample finder via
+Z3 model extraction. Each rung tries fail-fast with a per-rung
+budget, and first-to-close wins. The
+verbose variant \texttt{pythia?} reports the closing rung and
+per-rung wall-clock timing for diagnostic use. \texttt{pythia}
+ships ten registered tactics in total. Six attribute-driven
+registries cover lemma routing: \texttt{@[stat\_lemma]},
 \texttt{@[stats\_ineq]}, \texttt{@[prob\_simp]},
-\texttt{@[stat\_simp]}, \texttt{@[anytime\_valid\_lemma]}, plus the
-\texttt{DomainCalculator} typeclass for per-domain numerical
-calculators), and a fifteen-domain proof library with thirty-two
-cross-domain theorems carrying matched Python sim runners
-(property-based testing, deterministic sweeps, mutation testing).
+\texttt{@[stat\_simp]}, \texttt{@[anytime\_valid\_lemma]}, plus
+the \texttt{DomainCalculator} typeclass for per-domain numerical
+calculators. The proof library spans fifteen domains and carries
+thirty-two cross-domain theorems with matched Python sim runners.
+Sim runners exercise property-based testing, deterministic
+sweeps, and mutation testing.
 The shipped library is axiom-clean against
 $\{\texttt{propext}, \texttt{Classical.choice}, \texttt{Quot.sound}\}$
 and pinned to Lean 4.28 + Mathlib v4.28.0. The cross-prover ladder
-is offline-first and LLM-free: SMT and ATP backends are
-deterministic decision procedures with verifiable Lean
-reconstruction; LLM-augmented closure lives in a separate
-companion SDK that the library does not depend on. Hard
-structural Mathlib gaps are optionally routed to the Aristotle
-automated theorem prover \citep{harmonic2025aristotle} for
-development-time restocking only, with kernel-checked
-reconstruction inside Lean and an audit gate against vacuous
-closures.
+is offline-first and free of large language models (LLMs). SMT and
+ATP backends are deterministic decision procedures with verifiable
+Lean reconstruction. LLM-augmented closure lives in a separate
+companion software development kit (SDK) that the library does not
+depend on. Hard structural Mathlib gaps are optionally routed to
+the Aristotle automated theorem prover
+\citep{harmonic2025aristotle} for development-time restocking only,
+with kernel-checked reconstruction inside Lean and an audit gate
+against vacuous closures.
 
 \paragraph{Case study (vacuous-truth catch).}
 On 2026-04-26 the Aristotle prover closed a candidate theorem in
 our \texttt{wald\_wolfowitz\_optimal} development by routing
-through a contradictory premise: a Bool partition combined with a
+through a contradictory premise. A Bool partition combined with a
 log-boundary constraint forced both $\alpha \geq 1$ and $\alpha <
 1$, closing the goal vacuously. The closure was kernel-checked.
 The theorem statement was the bug. The library audit caught the
@@ -83,9 +88,10 @@ integration as a development-time oracle and the vacuous-truth
 refusal policy.
 Section~\ref{sec:discussion} compares against aesop, Sledgehammer,
 CoqHammer, and Mathlib's existing tactic suite, states limitations,
-and reports a small Aristotle vs DSPv2 vs Opus 4.6 head-to-head on
-a subset of FormalAVS \citep{anonymous2026formalavs}. Full numbers
-are in the dataset paper.
+and reports a small head-to-head between Aristotle, the DeepSeek
+Prover-V2 (DSPv2) model, and Claude Opus 4.6 on a subset of
+FormalAVS \citep{anonymous2026formalavs}. Full numbers are in the
+dataset paper.
 
 \paragraph{Reproduction and code.}
 The \texttt{pythia} library is open source. The URL is redacted
