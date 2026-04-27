@@ -42,19 +42,22 @@ Mathlib tactics. The fall-through chain at stage 2 of the dispatcher
 combines \texttt{simp}, \texttt{omega}, \texttt{linarith}, and
 \texttt{positivity}. The chain is the explicit composition.
 
-\subsection{Aristotle vs DSPv2 vs Opus 4.6 (illustrative)}
+\subsection{Per-drafter contribution on a benchmark subset}
 \label{sec:discussion-comparison-empirical}
 
 Table~\ref{tab:illustrative-comparison} reports four FormalAVS
-problems \citep{anonymous2026formalavs} on which Aristotle, DSPv2
-(DSPv2-7B GPTQ-int8, a quantised local-GPU prover), and Opus 4.6 (an
-API generalist drafter) were each given a single-attempt protocol
-(Aristotle is one session per problem. DSPv2 and Opus run pass@5
-at $N=5$ on the $48$-slate.) The full benchmark numbers are in the
-dataset paper. The
-point of this subset is to expose the four solver regimes that the
-benchmark tail surfaces. Per-problem solve outcomes are
-kernel-checked.
+problems \citep{anonymous2026formalavs} on which the four drafters
+in our swarm were each tried under a fixed protocol. Aristotle
+\citep{harmonic2025aristotle} is one session per problem.
+DeepSeek-Prover-V2 \citep{deepseekprover2024v2} (DSPv2-7B
+GPTQ-int8, a quantised local-GPU prover) and Opus 4.6 (a
+generalist API drafter) run pass@5 at $N{=}5$ on the $48$-target
+slate. The point of this subset is to expose the four
+contribution regimes the benchmark tail surfaces. None of the
+drafters dominates across the four rows. Per-problem solve
+outcomes are kernel-checked. Drafter contributions are shown to
+illustrate \emph{which} drafter helped close which theorem in
+the corpus, not to claim any drafter is a ground-truth oracle.
 
 \begin{table}[h]
 \centering

@@ -1,101 +1,151 @@
 \section{Introduction}
 \label{sec:intro}
 
-Lean 4 with Mathlib ships strong general-purpose proof automation
-\citep{moura2021lean, mathlib2020community, mathlib2025}. Forward
-search lives in \texttt{aesop} and rewriting in \texttt{simp}.
-Arithmetic is split across \texttt{linarith}, \texttt{polyrith},
-and \texttt{nlinarith}. Sign goals route through \texttt{positivity}
-and the $\sigma$-algebra fragment through \texttt{measurability}.
-Monotone composition uses \texttt{bound} and generalised congruence
-uses \texttt{gcongr}.
-Applied-mathematics proofs route through these general tactics,
-typically by hand decomposition into a chain of \texttt{simp} sets,
-\texttt{linarith} hypotheses, and Mathlib lemma selection. None of
-the general tactics know about each other. The user is the
-orchestrator. There is no domain hammer for applied mathematics.
+Working scientists rely on the Python scientific stack to do
+applied mathematics. SciPy, NumPy, statsmodels, and PyMC give a
+probabilist domain-aware functions to manipulate distributions,
+estimators, and martingales. A control theorist composes
+\texttt{control.lqr} with NumPy's linear-algebra routines to
+analyse stability. A computational biologist runs Hardy-Weinberg
+equilibrium under the same pytest setup as the rest of their
+codebase. The empirical workflow is mature and the test
+discipline is sharp. Property-based testing exercises the
+empirical statement under random inputs in the modelled regime.
+Deterministic parameter sweeps cover a grid. Mutation testing
+flips one operator or one constant in the empirical model and
+confirms the test suite catches the change.
 
-CoqHammer \citep{czajkakaliszyk2018coqhammer} dispatches Coq goals
-to external automated theorem provers (ATPs) such as Vampire, E,
-and CVC4, with kernel-checked reconstruction. Sledgehammer
-\citep{paulsonblanchette2010threeyears, blanchettesledgehammer2011}
-plays the same role in Isabelle/Higher Order Logic (HOL). Lean 4 has no comparable
-hammer. This paper does not attempt the fully-general case across
-all of Lean. We address the applied-mathematics surface: a
-registered library of concentration, anytime-valid, optimal
-transport, control-theoretic, and information-theoretic lemmas
-plus a fan-out across local Satisfiability Modulo Theories (SMT)
-and ATP solvers, packaged as a single deterministic tactic call.
+Lean 4 with Mathlib has grown rapidly on the formal-proof side
+\citep{moura2021lean, mathlib2020community, mathlib2025}. A
+broad general tactic suite ships with it. Forward search lives in
+\texttt{aesop} and rewriting in \texttt{simp}. Arithmetic is
+split across \texttt{linarith}, \texttt{polyrith}, and the
+small non-linear fragment in \texttt{nlinarith}. Sign goals
+route through \texttt{positivity} and the $\sigma$-algebra
+fragment through \texttt{measurability}. Monotone composition
+uses \texttt{bound}. Generalised congruence uses \texttt{gcongr}. Each tactic is general-purpose. None of
+them know about each other, and none of them know about the
+domains a working scientist actually proves things in. A
+biologist proving Hardy-Weinberg has to compose \texttt{ring}
+with a hand-picked Mathlib lemma. An economist proving constant
+returns to scale for Cobb-Douglas has to chain real-power-cast
+rewrites with \texttt{ring}. A queueing theorist proving
+Little's law has to assemble the steady-state identity by hand. The orchestration is the user's
+job, and the user has to be a Lean expert before they can be a
+domain expert.
+
+The other side of the disconnect is the test discipline. A
+working scientist's empirical specification of Hardy-Weinberg
+lives as a Python function with a hypothesis test and a
+parameter sweep, exercised under pytest in CI. A formal Lean
+statement of the same theorem typically lives in a separate
+file, in a separate language, with no shared tests. The two
+specifications drift. No library closes the gap on both sides
+at once. There is no domain-aware tactic surface paired with a
+Python test layer that keeps the empirical and formal
+statements aligned.
 
 \paragraph{Contribution.}
-We present \texttt{pythia}, a Lean 4 tactic library for
-applied-mathematics proof automation. The headline tactic
-\texttt{pythia!} orchestrates a nine-rung deterministic ladder
-under one call. The first five rungs are pure-Lean tactics. They are
-\texttt{stat\_simp} (curated probability and ENNReal normal
-forms), the \texttt{linarith}/\texttt{nlinarith}/\texttt{polyrith}
-chain, \texttt{positivity}, \texttt{aesop} on the registered
-\texttt{Pythia} ruleset, and the \texttt{@[stat\_lemma]}
-shape-dispatch cascade. The next three rungs are external solvers
-with kernel-checked reconstruction. They are \texttt{z3\_check}
-(linear real arithmetic via Z3), \texttt{cvc5\_check} (bit-vector
-and linear real arithmetic via CVC5), and \texttt{vampire\_check}
-or \texttt{e\_check} (first-order logic, FOL, via Vampire or E).
-The final rung is \texttt{disprove}, a counterexample finder via
-Z3 model extraction. Each rung tries fail-fast with a per-rung
-budget, and first-to-close wins. The
-verbose variant \texttt{pythia?} reports the closing rung and
-per-rung wall-clock timing for diagnostic use. \texttt{pythia}
-ships ten registered tactics in total. Six attribute-driven
-registries cover lemma routing: \texttt{@[stat\_lemma]},
-\texttt{@[stats\_ineq]}, \texttt{@[prob\_simp]},
-\texttt{@[stat\_simp]}, \texttt{@[anytime\_valid\_lemma]}, plus
-the \texttt{DomainCalculator} typeclass for per-domain numerical
-calculators. The proof library spans fifteen domains and carries
-thirty-two cross-domain theorems with matched Python sim runners.
-Sim runners exercise property-based testing, deterministic
-sweeps, and mutation testing.
-The shipped library is axiom-clean against
-$\{\texttt{propext}, \texttt{Classical.choice}, \texttt{Quot.sound}\}$
-and pinned to Lean 4.28 + Mathlib v4.28.0. The cross-prover ladder
-is offline-first and free of large language models (LLMs). SMT and
-ATP backends are deterministic decision procedures with verifiable
-Lean reconstruction. LLM-augmented closure lives in a separate
-companion software development kit (SDK) that the library does not
-depend on. Hard structural Mathlib gaps are optionally routed to
-the Aristotle automated theorem prover
-\citep{harmonic2025aristotle} for development-time restocking only,
-with kernel-checked reconstruction inside Lean and an audit gate
-against vacuous closures.
+We present \texttt{pythia}, a Lean 4 library that delivers a
+domain-aware proof toolkit and an empirical test layer in one
+package. The library is organised around three contributions.
 
-\paragraph{Case study (vacuous-truth catch).}
-On 2026-04-26 the Aristotle prover closed a candidate theorem in
-our \texttt{wald\_wolfowitz\_optimal} development by routing
-through a contradictory premise. A Bool partition combined with a
-log-boundary constraint forced both $\alpha \geq 1$ and $\alpha <
-1$, closing the goal vacuously. The closure was kernel-checked.
-The theorem statement was the bug. The library audit caught the
-issue and forced a restatement to the two-measure form. We treat
-this kind of catch as a first-class library responsibility, not as
-a separate review pass.
+(1) \emph{A corpus of thirty-two cross-domain theorems across
+fifteen applied-math fields.} Probability and statistics covers
+anytime-valid inference, sub-Gaussian and sub-gamma
+concentration, and matrix concentration. Biology covers
+Hardy-Weinberg equilibrium, Lotka-Volterra, SIR conservation,
+Michaelis-Menten saturation, and mass-action kinetics. Chemistry
+covers Arrhenius rate-law positivity and Henderson-Hasselbalch.
+Economics covers Cobb-Douglas constant returns to scale, CRRA
+concavity, CAPM linear pricing, and Walras' law. Control theory
+covers scalar and discrete-time Lyapunov stability. Optimal
+transport covers discrete $L_1$ Wasserstein non-negativity.
+Quantum information covers qubit von Neumann entropy
+non-negativity. Stochastic calculus covers the It\^o isometry,
+the Burkholder, Davis, and Gundy inequality at $p{=}2$, and
+Robbins-Siegmund and Robbins-Monro convergence. Game theory
+covers the von Neumann two-strategy minimax inequality.
+Thermodynamics covers the Carnot upper bound. Numerical
+analysis covers Newton iteration positivity,
+Picard-Lindel\"of, KKT conditions, and Kahan summation. Queueing
+covers Erlang-B and Little's law. Operations research covers
+the OR specialisation of Little's law. Every public theorem is
+axiom-clean against
+$\{\texttt{propext}, \texttt{Classical.choice}, \texttt{Quot.sound}\}$.
+
+(2) \emph{Matched Python sim runners on every theorem.}
+Property-based testing exercises the empirical statement under
+random inputs in the modelled regime. Deterministic sweeps
+exercise it on a parameter grid. Mutation testing flips one
+operator or one constant in the empirical model and confirms the
+test suite catches the change. The Lean statement and the Python
+empirical model share test names and regime-of-validity
+declarations so the two specifications stay aligned.
+
+(3) \emph{A ten-tactic surface and six attribute-driven
+registries.} The headline tactic \texttt{pythia!} orchestrates a
+nine-rung deterministic ladder. The first five rungs are
+Mathlib-side: \texttt{stat\_simp} on the curated probability
+and ENNReal simp set, the
+\texttt{linarith}/\texttt{nlinarith}/\texttt{polyrith} chain,
+\texttt{positivity}, \texttt{aesop} on the registered
+\texttt{Pythia} ruleset, and the \texttt{@[stat\_lemma]}
+shape-dispatch cascade. The next four are external decision
+procedures with kernel-checked reconstruction. Z3 and CVC5
+handle Satisfiability Modulo Theories. Vampire and E handle
+first-order logic. The final rung \texttt{disprove} catches
+vacuous-truth goal statements via a Z3 model query on the
+negation. Each rung tries fail-fast with a bounded budget, and
+the first rung to close wins. The verbose variant
+\texttt{pythia?} reports the closing rung and per-rung
+wall-clock timing. The cross-prover ladder is offline-first and
+free of large language models. Six attribute-driven registries
+(\texttt{@[stat\_lemma]}, \texttt{@[stats\_ineq]},
+\texttt{@[prob\_simp]}, \texttt{@[stat\_simp]},
+\texttt{@[anytime\_valid\_lemma]}, plus the per-domain
+\texttt{DomainCalculator} typeclass) let users register new
+lemmas. The headline tactic dispatches them automatically.
+
+\paragraph{How the corpus was built.}
+Many of the domain theorems in the library involve structural
+gaps that Mathlib does not currently close, and many require a
+proof shape that the general tactics cannot synthesise on their
+own. We seeded the corpus with help from a swarm of contemporary
+drafters: the Aristotle automated theorem prover
+\citep{harmonic2025aristotle}, the DeepSeek-Prover-V2 7B model
+\citep{deepseekprover2024v2}, Claude Sonnet 4.6, and Claude Opus
+4.6. Each candidate proof produced by a drafter is submitted to
+the Lean kernel for checking. Drafters are not oracles. The only
+authority in the loop is the Lean kernel and the axiom audit.
+Each candidate proof goes through three filter stages before it
+enters the library. The kernel checks the proof. The axiom
+auditor confirms the proof reduces under the standard kernel
+set. A vacuous-truth refusal pass catches proofs that closed by
+deriving a contradiction from a malformed theorem statement.
+Different drafters contribute different theorems, with no single
+drafter dominating across the fifteen domains.
 
 \paragraph{Paper organisation.}
 Section~\ref{sec:tactic-surface} describes the ten-tactic surface
 and the registry attributes.
-Section~\ref{sec:library} groups the shipped library content by
-domain. Section~\ref{sec:aristotle} describes the Aristotle
-integration as a development-time oracle and the vacuous-truth
-refusal policy.
-Section~\ref{sec:discussion} compares against aesop, Sledgehammer,
-CoqHammer, and Mathlib's existing tactic suite, states limitations,
-and reports a small head-to-head between Aristotle, the DeepSeek
-Prover-V2 (DSPv2) model, and Claude Opus 4.6 on a subset of
-FormalAVS \citep{anonymous2026formalavs}. Full numbers are in the
-dataset paper.
+Section~\ref{sec:library} groups the theorem corpus and the
+matched Python sim runners by domain.
+Section~\ref{sec:aristotle} describes how candidate proofs from
+the drafter swarm are filtered into the library and the
+vacuous-truth refusal policy that drove our restatement of
+\texttt{wald\_wolfowitz\_optimal}.
+Section~\ref{sec:discussion} compares against \texttt{aesop},
+Sledgehammer, CoqHammer, and Mathlib's existing tactic suite,
+states limitations, and reports per-domain drafter contribution
+on a subset of the FormalAVS benchmark
+\citep{anonymous2026formalavs}. Full numbers are in the dataset
+paper.
 
 \paragraph{Reproduction and code.}
-The \texttt{pythia} library is open source. The URL is redacted
-for double-blind review. Axiom audit transcripts and reproduction
-recipes are listed in Appendix~\ref{sec:appendix-repro}. The
-dataset of theorem-proving benchmarks (FormalAVS,
+The \texttt{pythia} library is open-source. The repository URL
+is redacted for double-blind review. Axiom audit transcripts
+and reproduction recipes are in
+Appendix~\ref{sec:appendix-repro}. The dataset of
+theorem-proving benchmarks (FormalAVS,
 \citet{anonymous2026formalavs}) is reported in a separate paper.

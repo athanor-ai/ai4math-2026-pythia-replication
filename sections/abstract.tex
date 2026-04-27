@@ -1,48 +1,44 @@
 % Abstract: AI4MATH 2026 workshop submission.
 \begin{abstract}
-Lean 4 with Mathlib ships strong general automation (\texttt{aesop},
-\texttt{simp}, \texttt{linarith}, \texttt{polyrith}, \texttt{nlinarith},
-\texttt{positivity}, \texttt{measurability}, \texttt{bound},
-\texttt{gcongr}). It does not ship a hammer for applied
-mathematics. The moment a goal mentions a martingale, a stopping
-time, a production function, an ordinary differential equation
-(ODE) Lyapunov candidate, a Wasserstein distance, or a quantum
-density operator, the generic tactics have nothing to apply.
-We present \texttt{pythia}, a Lean 4 tactic library for
-applied-mathematics proof automation. The headline tactic
-\texttt{pythia!} orchestrates a nine-rung deterministic ladder.
-The rungs are \texttt{stat\_simp}, the
-\texttt{linarith}/\texttt{nlinarith}/\texttt{polyrith} chain,
-\texttt{positivity}, \texttt{aesop} on the registered
-\texttt{Pythia} ruleset, the \texttt{@[stat\_lemma]} cascade,
-\texttt{z3\_check}, \texttt{cvc5\_check}, \texttt{vampire\_check}
-or \texttt{e\_check}, and \texttt{disprove}. Each rung tries
-fail-fast with a bounded budget. The verbose variant
-\texttt{pythia?} reports the closing rung and per-rung wall-clock
-timing for diagnostic use. The library ships ten registered
-tactics, attribute-driven registries (\texttt{@[stat\_lemma]},
-\texttt{@[stats\_ineq]}, \texttt{@[prob\_simp]},
-\texttt{@[stat\_simp]}, \texttt{@[anytime\_valid\_lemma]}, plus
-the per-domain calculator typeclass), and a fifteen-domain proof
-library with thirty-two cross-domain theorems carrying matched
-Python sim runners (property-based testing, deterministic sweeps,
-mutation testing). Domains span probability and statistics,
-biology, chemistry, economics, control theory, optimal transport,
-quantum information, stochastic calculus, game theory,
-thermodynamics, numerical analysis, queueing, and operations
-research. Every public theorem is axiom-clean against the standard
-Lean kernel set ($\texttt{propext}$, $\texttt{Classical.choice}$,
-$\texttt{Quot.sound}$). The cross-prover ladder is offline-first
-and free of large language models (LLMs): \texttt{z3\_check},
-\texttt{cvc5\_check}, \texttt{vampire\_check}, and \texttt{e\_check}
-dispatch to local Satisfiability Modulo Theories (SMT) and
-Automated Theorem Prover (ATP) binaries with kernel-checked
-reconstruction in the CoqHammer style of
-\citet{czajkakaliszyk2018coqhammer}. LLM-augmented closure lives
-in a separate companion software development kit (SDK) that the
-library does not depend on. Hard structural Mathlib gaps are
-optionally routed to the Aristotle automated theorem prover
-\citep{harmonic2025aristotle} for development-time restocking,
-with audit gates against vacuous-truth closures. The library is
-pinned to Lean 4.28 + Mathlib v4.28.0 and released open-source.
+Working scientists rely on the Python scientific stack for
+applied mathematics. SciPy, NumPy, and pytest let a probabilist
+or a control theorist write down a domain object, manipulate it
+with domain-aware functions, and exercise the result with
+property-based tests and parameter sweeps. The formal-proof
+analogue does not yet exist for these scientists. Lean 4 with
+Mathlib delivers kernel-checked proofs and a strong general
+tactic suite, but the suite does not compose into a domain
+hammer for applied mathematics. The formal layer is also
+disconnected from the empirical sim-and-test workflow scientists
+already use.
+
+We present \texttt{pythia}, a Lean 4 library that closes this
+gap on three sides. First, \texttt{pythia} ships a corpus of
+thirty-two cross-domain theorems across fifteen applied-math
+fields, covering probability and statistics, biology, chemistry,
+economics, control, optimal transport, quantum information,
+stochastic calculus, game theory, thermodynamics, numerical
+analysis, queueing, and operations research. Every public
+theorem is axiom-clean against the standard kernel set
+$\{\texttt{propext}, \texttt{Classical.choice}, \texttt{Quot.sound}\}$.
+Second, every theorem carries a matched Python sim runner that
+exercises the empirical specification under property-based
+testing, parameter sweeps, and mutation testing. The Lean
+statement and the Python empirical model share names and
+regime-of-validity declarations so they stay aligned. Third,
+\texttt{pythia} ships ten registered tactics. The headline
+tactic \texttt{pythia!} walks a nine-rung deterministic ladder
+that composes Mathlib tactics, local SMT solvers (Z3, CVC5),
+and external ATP backends (Vampire, E).
+
+The corpus was assembled with help from a swarm of contemporary
+drafters: Aristotle \citep{harmonic2025aristotle},
+DeepSeek-Prover-V2 \citep{deepseekprover2024v2}, Claude Sonnet
+4.6, and Claude Opus 4.6. Drafters are not oracles. Each
+candidate proof is checked by the Lean kernel, audited against
+the closed-form axiom set, and filtered for vacuous closures
+before it enters the library. The result is a Lean library that
+a working scientist can use the way they use SciPy. The library
+is pinned to Lean 4.28 + Mathlib v4.28.0 and released
+open-source.
 \end{abstract}
