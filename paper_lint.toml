@@ -6,7 +6,7 @@ venue = "neurips"
 # CFP at https://ai4math2026.github.io/#cfp does not publish
 # independent style files. The workshop sits in the ML-conference
 # orbit and prior cycles inherited the host conference template.
-# Aidan directive 2026-04-26 selects ICML formatting as the closest
+# ICML formatting selected as the closest
 # sane default. We use the neurips preset here (closest live ML
 # preset) and override caps below to match AI4MATH workshop scope
 # (5-page main body target). Replace with venue = "ai4math-2026"
@@ -14,7 +14,7 @@ venue = "neurips"
 # if that preset lands first.
 
 [layout]
-# Workshop format. AI4MATH 2026 CFP: 4-9 pages main body. Aidan
+# Workshop format. AI4MATH 2026 CFP: 4-9 pages main body.
 # directive: target 5 pages main + extensive appendix.
 min_words_per_page = 120
 page_ink_density_min = 0.02
