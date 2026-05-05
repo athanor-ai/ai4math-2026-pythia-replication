@@ -1,0 +1,182 @@
+/-
+Pythia.Tactic.Pythia — the `pythia` tactic.
+
+The flagship Lean tactic of the pythia library. Pythia is to
+statistics what `aesop` is to general math: a domain hammer that closes
+goals automatically by searching a registered lemma library and
+falling through Mathlib's standard automation ladder.
+
+## What it does
+
+`pythia` runs the `Pythia` aesop ruleset (containing every
+theorem tagged with `@[stat_lemma]`) plus the default aesop ruleset,
+chained with `simp`, `omega`, `linarith`, `positivity`, and the
+existing `anytime_valid` tactic for CS-bound goals.
+
+```lean
+example (h : Supermartingale f 𝓕 μ) (hnn : ∀ t ω, 0 ≤ f t ω)
+    (hint : Integrable (f 0) μ) {c : ℝ} (hc : 0 < c)
+    [IsFiniteMeasure μ] :
+    μ {ω | ∃ t, f t ω ≥ c} ≤ (∫ ω, f 0 ω ∂μ).toNNReal / c.toNNReal := by
+  pythia
+```
+
+## Architecture
+
+* `@[stat_lemma]` user attribute — marks a theorem as a pythia
+  rule. Internally this is `@[aesop safe apply (rule_sets :=
+  [Pythia])]`, a thin wrapper for ergonomics so users don't have
+  to remember the aesop ruleset incantation.
+
+* `Pythia` aesop ruleset — declared at module load. Every
+  `@[stat_lemma]`-tagged theorem joins it.
+
+* `pythia` tactic — runs `aesop` against the union of
+  `[Pythia, default]` rule sets. If aesop fails, falls through
+  to a `simp; omega; linarith; positivity`-style cleanup chain. If
+  that fails, leaves the goal open with the partial progress visible.
+
+* `#stat_lemmas` command — lists every registered `@[stat_lemma]` for
+  introspection.
+
+## Status
+
+Iteration 1: minimal working tactic. Registers the ruleset, declares
+the attribute, dispatches via aesop, ships a smoke-test example.
+Future iterations:
+
+* Goal-shape dispatch: identify `μ {ω | ∃ t, ...}` goals and route to
+  `anytime_valid` BEFORE aesop (faster path for the common CS shape).
+* Hammer-style premise selection: for goals aesop times out on, query
+  the registered lemma DB by goal-pattern matching and surface the
+  top-3 candidates as `Try this:` suggestions.
+Pythia itself is fully offline; LLM-driven orchestration is out of
+scope for this library.
+
+## Driver
+
+(renamed from `pythia_hammer` to `pythia` 2026-04-25 per
+Aidan's "household name" directive). Phase B+ delivery.
+-/
+import Mathlib
+import Aesop
+import Pythia.Tactic.AnytimeValid
+import Pythia.Tactic.StatsIneq
+import Pythia.Tactic.ProbSimp
+import Pythia.Tactic.Z3Check
+import Pythia.Tactic.CVC5Check
+import Pythia.Tactic.VampireCheck
+import Pythia.Tactic.ECheck
+
+namespace Pythia
+
+open Lean Elab Meta Tactic
+
+-- The `Pythia` aesop ruleset. Every `@[stat_lemma]`-tagged
+-- theorem joins this set. The `pythia` tactic queries
+-- `[Pythia, default]` together.
+declare_aesop_rule_sets [Pythia]
+
+-- Trace class for `pythia` verbose mode. Always emits when the
+-- verbose ladder runs; the user can route the output via the standard
+-- `set_option trace.Pythia.Verbose true` mechanism. Retained for
+-- backwards compatibility with code that toggles this trace class
+-- directly; the canonical verbose tactic is now `pythia?` (ATH-756),
+-- which lives in `Pythia.Tactic.PythiaBang` and reports the full
+-- 9-rung ladder rather than the plain-pythia dispatch alone.
+initialize registerTraceClass `Pythia.Verbose
+
+/-- `@[stat_lemma]` — register a theorem as part of the `pythia` lemma
+library. Internally this is shorthand for `@[aesop safe apply
+(rule_sets := [Pythia])]`. Use this on user-facing statistical
+results so they auto-join the pythia hammer.
+
+```
+@[stat_lemma]
+theorem my_concentration_bound : ... := ...
+```
+
+Equivalent to manually writing:
+```
+@[aesop safe apply (rule_sets := [Pythia])]
+theorem my_concentration_bound : ... := ...
+```
+
+The advantage of the pythia-friendly name is discoverability: users
+searching for "stats lemmas" find `@[stat_lemma]` faster than the
+aesop ruleset incantation. -/
+syntax (name := statLemma) "stat_lemma" : attr
+
+initialize registerBuiltinAttribute {
+  name := `statLemma
+  descr := "Register theorem as a pythia `@[aesop safe apply (rule_sets := [Pythia])]` rule for the `pythia` tactic."
+  add := fun decl stx kind => do
+    -- Re-elaborate as `@[aesop safe apply (rule_sets := [Pythia])]`.
+    let aesopStx ← `(attr| aesop safe apply (rule_sets := [Pythia]))
+    Attribute.add decl `aesop aesopStx kind
+}
+
+/-- `pythia` — the pythia domain hammer.
+
+Runs aesop against the union of `Pythia` and `default` rule
+sets, falling through to a `simp`-based cleanup chain on failure.
+Designed for goals about supermartingales, sub-Gaussian / sub-gamma
+concentration, KL divergence, MGF identities, and CS admissibility.
+-/
+syntax (name := pythia) "pythia" : tactic
+
+-- ATH-756: the `pythia?` syntax now lives in
+-- `Pythia.Tactic.PythiaBang` (it is the verbose form of `pythia!`,
+-- the full 9-rung ladder). The plain-pythia verbose tactic was
+-- subsumed: rung 5 of the ladder is `pythia` itself, so verbose
+-- ladder output already names the plain-pythia close when it fires.
+-- Following Lean convention: `apply?`, `rw?`, `simp?`, `aesop?` —
+-- adding `?` to a closure tactic asks for an explanation.
+
+@[tactic pythia] def evalPythia : Tactic := fun stx => do
+  match stx with
+  | `(tactic| pythia) =>
+    -- Goal-shape dispatch ladder. Each specialized tactic has its own
+    -- shape matcher and fails fast when the goal doesn't apply, so the
+    -- `first` cascade pays only for the actual closer. See
+    -- `docs/sledgehammer_dispatch.md` for the full routing table.
+    -- Each branch is gated with `done` so a partial closure (which can
+    -- happen when an inner tactic uses `warnOnNonterminal := false` and
+    -- silently leaves goals) does not lock the cascade in. The branch
+    -- only commits when the goal is actually closed.
+    let cascade ← `(tactic|
+      first
+        -- Most specific shapes first.
+        | (anytime_valid; done)                      -- Ville-bound shapes
+        | (stats_ineq; done)                         -- concentration tails
+        | (prob_simp; done)                          -- measure rewriting
+        | (z3_check; done)                           -- QF_LRA over ℝ
+        | (cvc5_check; done)                         -- QF_BV primary + QF_LRA backup
+        | (vampire_check; done)                      -- FOL via Vampire
+        | (e_check; done)                            -- FOL via E (backup)
+        -- Pythia's own aesop ruleset (registered `@[stat_lemma]` rules).
+        | aesop (config := { warnOnNonterminal := false })
+                (rule_sets := [Pythia])
+        -- Generic Mathlib closer chain.
+        | (try simp) <;> (try omega) <;> (try linarith) <;> (try positivity)
+        -- Aesop default ruleset, last resort.
+        | aesop (config := { warnOnNonterminal := false }))
+    evalTactic cascade
+  | _ => throwUnsupportedSyntax
+
+-- `pythia.machineFormat` was the legacy option that toggled tagged
+-- log-line emission for the verbose plain-`pythia?` tactic. ATH-756
+-- folded the verbose-of-plain-pythia into the verbose-of-`pythia!`
+-- ladder; the replacement option is `pythia.bang.machineFormat`,
+-- declared in `Pythia.Tactic.PythiaBang`.
+
+/-- `#stat_lemmas` — list every theorem tagged `@[stat_lemma]` in the
+current scope. Helpful for discovering what `pythia` will try. -/
+elab "#stat_lemmas" : command => do
+  -- Aesop's ruleset state is opaque; we surface the same info via
+  -- the standard `#aesop_status` query for the Pythia ruleset.
+  -- For now this is a thin info-line so users know where to look;
+  -- a richer enumeration ships in iteration 2.
+  logInfo m!"`@[stat_lemma]` rules live in the `Pythia` aesop ruleset.\nQuery directly with `set_option trace.aesop true in pythia` to see what pythia tries on a given goal."
+
+end Pythia
