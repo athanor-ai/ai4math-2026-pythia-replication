@@ -1,55 +1,25 @@
-# AI4MATH 2026 submission: pythia
+# Replication package — pythia: a Lean 4 tactic library for statistical proof automation
 
-LaTeX source for the AI4MATH 2026 workshop submission on `pythia`, a
-Lean 4 tactic library for statistical proof automation.
+AI4Math @ ICML 2026 submission.
 
-- Workshop CFP: <https://ai4math2026.github.io/#cfp>
-- Deadline: 2026-05-25
-- Format: ICML 2026 styles vendored under `styles/` (AI4MATH 2026 has
-  no independent template; we use the official ICML 2026 styles
-  released 2025-10-29).
-
-## Build
+## One command
 
 ```bash
-bash build.sh
+bash reproduce.sh
 ```
 
-Runs `pdflatex` x3 + `bibtex` and produces `main.pdf`. Set
-`SKIP_PAPER_LINT=1` to skip the lint gate.
+Verifies the Lean library compiles axiom-clean (~5 min after Mathlib cache download).
 
-## paper_lint
+## Requirements
 
-The build invokes the athanor-builder `paper_lint` tool to catch
-em-dashes, AI-fingerprint vocabulary, semicolons-as-prose-glue, and
-intent-hedging. Configure via `paper_lint.toml`. Set
-`BUILDER_PATH=/path/to/athanor-builder` if your checkout is not at
-`$HOME/athanor-builder`.
+- Lean 4 via [elan](https://github.com/leanprover/elan)
 
-Manual invocation:
+## What gets reproduced
 
-```bash
-PYTHONPATH=$HOME/athanor-builder/tools python3 -m paper_lint .
-```
+| Step | Output | Paper location |
+|------|--------|----------------|
+| Lean axiom audit | all 32 theorems build clean | §2, §3 |
 
-## Companion repositories
+## Note
 
-- The `pythia` Lean 4 library lives at the public open-source
-  repository (URL redacted for double-blind submission; supplied in
-  camera-ready). The library and its CI live there.
-- The `FormalAVS` benchmark and the dataset paper that reports full
-  Aristotle / DSPv2 / Opus 4.6 numbers live in the companion dataset
-  paper repository (URL redacted; cited as `\cite{anonymous2026formalavs}`).
-
-## Layout
-
-- `main.tex`: top-level driver.
-- `sections/`: section-by-section content (abstract, intro,
-  tactic-surface, library, aristotle, discussion, appendix).
-- `references.bib`: BibTeX.
-- `styles/`: vendored ICML 2026 sty/cls/bst.
-- `paper_lint.toml`: lint config, `venue = "ai4math-2026"` (preset
-  not yet shipped in athanor-builder; documented gap inside the
-  config).
-- `build.sh`: build driver.
-- `figures/`: figure assets.
+The Python simulation layer (property-based tests and parameter sweeps) is described in the paper but the scripts are not yet included in this release. The Lean library and axiom audit are the primary reproducible artifact.
